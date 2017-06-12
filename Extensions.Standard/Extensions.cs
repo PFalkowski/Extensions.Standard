@@ -1,0 +1,854 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
+using System.Xml.Serialization;
+
+namespace Extensions.Standard
+{
+    public static partial class Extensions
+    {
+        #region Primes
+
+        /// <summary>
+        ///     Find whether a number is the prime number.
+        ///     Not so intuitive at first glance, but fast.
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static bool IsPrime(this int n)
+        {
+            if (n < 2) return false;
+            if (n == 2 || n == 3) return true;
+            if (n % 2 == 0 || n % 3 == 0) return false;
+            var maxDivisor = (int)Math.Sqrt(n);
+            var divisor = 5;
+            while (divisor <= maxDivisor)
+            {
+                if (n % divisor == 0 || n % (divisor + 2) == 0)
+                    return false;
+                divisor += 6;
+            }
+            return true;
+        }
+
+        #endregion
+
+        #region Geometry
+
+        /// <summary>
+        /// Hyperbolic secant (Sech(x)). Derivative of Tanh when squared.
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
+        public static double Sech(double val)
+        {
+            return 2 / (Math.Exp(val) + Math.Exp(-val));
+        }
+
+        public static double ToDegrees(this double radians)
+        {
+            return radians * (180.0 / Math.PI);
+        }
+
+        public static double ToRadians(this double degrees)
+        {
+            return degrees / (180.0 / Math.PI);
+        }
+
+        public static double[] ConstructLine(double[] startingPointXy, double length, double angleDegrees)
+        {
+            return new[]
+            {
+                startingPointXy[0],
+                startingPointXy[1],
+                startingPointXy[0] + length * Math.Cos(angleDegrees),
+                startingPointXy[1] + length * Math.Sin(angleDegrees)
+            };
+        }
+
+        public static double Interpolate(double[] p1, double[] p2, double x)
+        {
+            return p1[1] + ((x - p1[0]) * p2[1] - (x - p1[0]) * p1[1]) / (p2[0] - p1[0]);
+        }
+
+        /// <summary>
+        ///     Calculate area of polygon.
+        /// </summary>
+        /// <param name="polygon">Should contain consecutive points, index 0 for x and 1 for y. Further values will be omited.</param>
+        /// <returns>Area</returns>
+        public static double Area(this IList<double[]> polygon)
+        {
+            var num = 0.0;
+            var index = polygon.Count - 1;
+            for (var i = 0; i < polygon.Count; ++i)
+            {
+                num += (polygon[index][0] + polygon[i][0]) * (polygon[index][1] - polygon[i][1]);
+                index = i;
+            }
+            return num / 2;
+        }
+
+        #endregion
+
+        #region Distance Measures
+
+        public static bool InClosedRange<T>(this T value, T from, T to) where T : IComparable<T>
+        {
+            return value.CompareTo(@from) > 0 && value.CompareTo(to) < 0;
+        }
+
+        public static bool InOpenRange<T>(this T value, T from, T to) where T : IComparable<T>
+        {
+            return value.CompareTo(@from) >= 0 && value.CompareTo(to) <= 0;
+        }
+
+        /// <summary>
+        ///     The distance between two points measured along axes at right angles. Sum of absolute differences of Cartesian
+        ///     coordinates.
+        ///     Points coordinates may be either: for one axis only (than invariant X axis is assumed) or X and Y values at same
+        ///     indexes,
+        ///     example: { source[0] = x1, other[0] = x2, source[1] = y1, other[1] = y2, ... etc. }
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static double ManhattanDistance(this IEnumerable<double> source, IEnumerable<double> other)
+        {
+            return source.InnerProduct(other, 0.0, (result, x, y) => result + Math.Abs(x - y));
+        }
+
+        /// <summary>
+        ///     Euclidean Distance.
+        ///     Points coordinates may be either: for one axis only (than invariant X axis is assumed) or X and Y values at same
+        ///     indexes,
+        ///     example: { source[0] = x1, other[0] = x2, source[1] = y1, other[1] = y2, ... etc. }
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static double EuclideanDistance(this IEnumerable<double> source, IEnumerable<double> other)
+        {
+            return Math.Sqrt(source.InnerProduct(other, 0.0, (result, x, y) => result + Math.Pow(x - y, 2)));
+        }
+
+        /// <summary>
+        ///     Mean Squared Error.
+        ///     The difference between values implied by an estimator and the true values.
+        ///     Average of the squares of the differences.
+        ///     MSE multiplied by N(number of samples ) is equal sample Variance.
+        ///     Square root of MSE is the Euclidean distance of average data point to average true value. Points coordinates may be
+        ///     either: for one axis only (than invariant X axis is assumed) or X and Y values at same indexes.
+        /// </summary>
+        /// <param name="predicted"></param>
+        /// <param name="trueValue"></param>
+        /// <returns></returns>
+        /// reference: http://en.wikipedia.org/wiki/Mean_squared_error
+        public static double Mse(this IEnumerable<double> predicted, IEnumerable<double> trueValue)
+        {
+            var distance = 0.0D;
+            var c = 0;
+            using (var predIter = predicted.GetEnumerator())
+            using (var expectedIter = trueValue.GetEnumerator())
+            {
+                while (predIter.MoveNext() && expectedIter.MoveNext())
+                {
+                    distance += Math.Pow(predIter.Current - expectedIter.Current, 2);
+                    ++c;
+                }
+            }
+            return distance / c;
+        }
+        #endregion
+
+        #region Sequence algorithms
+
+
+        /// <summary>
+        ///     Softmax that doesn't choke on Lists larger than 200. See: http://stackoverflow.com/q/9906136
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static IList<double> Softmax(this IList<double> input)
+        {
+            var max = input.Max();
+
+            var result = new double[input.Count];
+            double sum = 0.0;
+            for (var i = 0; i < input.Count; ++i)
+            {
+                result[i] = Math.Exp(input[i] - max);
+                sum += result[i];
+            }
+
+            for (var i = 0; i < input.Count; ++i)
+                result[i] /= sum;
+
+            return result;
+        }
+
+        public static TAccumulate InnerProduct<TSource, TAccumulate>(this IEnumerable<TSource> source,
+            IEnumerable<TSource> other, TAccumulate seed, Func<TAccumulate, TSource, TSource, TAccumulate> func)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (other == null) throw new ArgumentNullException(nameof(other));
+            if (func == null) throw new ArgumentNullException(nameof(func));
+
+            using (var xIter = source.GetEnumerator())
+            using (var yIter = other.GetEnumerator())
+            {
+                var result = seed;
+                while (xIter.MoveNext() && yIter.MoveNext())
+                {
+                    result = func(result, xIter.Current, yIter.Current);
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
+        ///     Knuth Shuffle - reorder items randomly in-place, with Fisher-Yates algorithm.
+        ///     O(n) complexity. see: http://rosettacode.org/wiki/Knuth_shuffle#C.23
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="input"></param>
+        /// <param name="rand"></param>
+        /// <returns></returns>
+        public static void Shuffle<T>(this IList<T> input, Random rand)
+        {
+            for (var i = 0; i < input.Count; ++i)
+            {
+                var j = rand.Next(i, input.Count);
+                var temp = input[i];
+                input[i] = input[j];
+                input[j] = temp;
+            }
+        }
+
+        public static List<List<T>> Partition<T>(this IList<T> input, decimal firstPartitionRatio)
+        {
+            if (firstPartitionRatio <= 0 || firstPartitionRatio > 1.0m)
+                throw new ArgumentOutOfRangeException(nameof(firstPartitionRatio));
+
+            var partitionDefinition = new PartitioningDefinition(new List<decimal> { firstPartitionRatio, 1m - firstPartitionRatio });
+
+            return input.Partition(partitionDefinition);
+        }
+
+        public static List<List<T>> Partition<T>(this IList<T> input, PartitioningDefinition partitioningDefinition)
+        {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            if (input.Count == 0) throw new ArgumentException(nameof(input));
+            if (partitioningDefinition == null) throw new ArgumentNullException(nameof(partitioningDefinition));
+            if (!partitioningDefinition.IsValid()) throw new ArgumentException(nameof(partitioningDefinition));
+
+            var result = new List<List<T>>(partitioningDefinition.PartitionsNumber);
+            var i = 0;
+
+            foreach (var proportion in partitioningDefinition.PartitionsDefinitions)
+            {
+                var endingElementIndex = (int)(i + proportion * input.Count);
+                var tempList = new List<T>(endingElementIndex - i);
+                for (; i < endingElementIndex; ++i)
+                {
+                    tempList.Add(input[i]);
+                }
+                result.Add(tempList);
+            }
+            for (; i < input.Count; ++i)
+            {
+                result.Last().Add(input[i]);
+            }
+            return result;
+        }
+
+        public static bool EqualsWithTolerance(this double lhs, double rhs, double delta = 0.0000000001)
+        {
+            return Math.Abs(lhs - rhs) <= delta;
+        }
+
+        public static bool SequenceEquals(this IEnumerable<double> seqenceA, IEnumerable<double> seqenceB, double tolerance)
+        {
+            if (seqenceA == null && seqenceB == null) return true;
+            if (seqenceA == null || seqenceB == null) return false;
+            var listA = seqenceA as IList<double> ?? seqenceA.ToList();
+            var listB = seqenceB as IList<double> ?? seqenceB.ToList();
+            if (listA.Count != listB.Count) return false;
+            using (var e1 = listA.GetEnumerator())
+            using (var e2 = listB.GetEnumerator())
+            {
+                while (e1.MoveNext() && e2.MoveNext())
+                {
+                    if (!e1.Current.EqualsWithTolerance(e2.Current, tolerance)) return false;
+                }
+            }
+            return true;
+        }
+        /// <summary>
+        /// Largest value index. If the sequence contains more than one, first occurence's index will be returned.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static int MaxIndex(this IList<double> input)
+        {
+            var index = 0;
+            var value = input[0];
+            for (var i = 0; i < input.Count; ++i)
+            {
+                if (input[i] > value)
+                {
+                    value = input[i];
+                    index = i;
+                }
+            }
+            return index;
+        }
+
+        #endregion
+
+        #region Randomization
+
+        /// <summary>
+        ///     Get random number from 0 to 255 or specified upper limit.
+        ///     Number is less than specified maximum.
+        /// </summary>
+        /// <param name="rng"></param>
+        /// <param name="upperLimit"></param>
+        /// <returns></returns>
+        public static byte NextByte(this Random rng, short upperLimit = byte.MaxValue + 1)
+        {
+            return (byte)rng.Next(upperLimit);
+        }
+
+        public static bool NextBool(this Random rng)
+        {
+            return rng.Next() % 2 == 0; // or rng.NextDouble() < .5;
+        }
+
+        public static char RandomLowercaseLetter(this Random rng)
+        {
+            return rng.NextChar((char)97, (char)123);
+        }
+
+        public static char RandomUppercaseLetter(this Random rng)
+        {
+            return rng.NextChar((char)65, (char)91);
+        }
+
+        public static char NextChar(this Random rng, char lowerInclusive = '0', char upperExclusive = '{')
+        {
+            return Convert.ToChar(rng.Next(lowerInclusive, upperExclusive));
+        }
+
+        /// <summary>
+        ///     See ref http://stackoverflow.com/a/3365388/3922292
+        /// </summary>
+        /// <param name="random"></param>
+        /// <returns></returns>
+        public static float NextFloat(this Random random)
+        {
+            var mantissa = random.NextDouble() * 2.0 - 1.0;
+            var exponent = Math.Pow(2.0, random.Next(-126, 128));
+            return (float)(mantissa * exponent);
+        }
+
+        public static char NextChar(this Random rng, string chooseFrom)
+        {
+            if (string.IsNullOrEmpty(chooseFrom)) return (char)0;
+            return chooseFrom[rng.Next(chooseFrom.Length)];
+        }
+
+        public static char NextLetter(this Random rng)
+        {
+            return rng.NextChar("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+        }
+
+        public static char NextAlphanumeric(this Random rng)
+        {
+            return rng.NextChar("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+        }
+
+        public static double NextDouble(this Random rng, double min, double max)
+        {
+            return min + rng.NextDouble() * (max - min);
+        }
+
+        /// <summary>
+        ///     Box-Muller transform applied in order to get <b>normally-looking</b> double for provided mean and SD.
+        ///     Inspired by http://stackoverflow.com/a/218600
+        /// </summary>
+        /// <param name="rng"></param>
+        /// <param name="mean"></param>
+        /// <param name="sd"></param>
+        /// <returns></returns>
+        public static double NextNormal(this Random rng, double mean, double sd = 1)
+        {
+            var rand = Math.Sqrt(-2.0 * Math.Log(rng.NextDouble())) * Math.Sin(2.0 * Math.PI * rng.NextDouble());
+            return mean + sd * rand;
+        }
+
+        #endregion
+
+        #region Colors
+
+        /// <summary>
+        ///     (A)RGB values packed to one int.
+        /// </summary>
+        /// <param name="red"></param>
+        /// <param name="green"></param>
+        /// <param name="blue"></param>
+        /// <param name="alpha"></param>
+        /// <returns></returns>
+        public static int AsColor(byte red, byte green, byte blue, byte alpha = 255)
+        {
+            return alpha + (red << 8) + (green << 16) + (blue << 24);
+        }
+
+        /// <summary>
+        ///     Change int in AARRGGBB convention to byte array representing Red Green and Blue.
+        /// </summary>
+        /// <param name="argb"></param>
+        /// <returns></returns>
+        public static byte[] AsColor(this int argb)
+        {
+            return new[]
+            {
+                (byte) ((argb >> 24) & 0xff), (byte) ((argb >> 16) & 0xff), (byte) ((argb >> 8) & 0xff),
+                (byte) ((argb >> 0) & 0xff)
+            };
+        }
+
+        /// <summary>
+        ///     HSV (Hue Saturation Value) scale (H 0..360, S 0.0..1.0, V 0.0..1.0) to ARGB scale.
+        /// </summary>
+        /// <param name="hue"></param>
+        /// <param name="saturation"></param>
+        /// <param name="value"></param>
+        /// <returns>4 bytes for Alpha, Red, Green..</returns>
+        public static byte[] HsVtoArgb(double hue, double saturation, double value)
+        {
+            var hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
+            var f = hue / 60 - Math.Floor(hue / 60);
+
+            value *= 255;
+            var v = Convert.ToByte(value);
+            var p = Convert.ToByte(value * (1 - saturation));
+            var q = Convert.ToByte(value * (1 - f * saturation));
+            var t = Convert.ToByte(value * (1 - (1 - f) * saturation));
+
+            switch (hi)
+            {
+                case 0:
+                    return new byte[] { 255, v, t, p };
+                case 1:
+                    return new byte[] { 255, q, v, p };
+                case 2:
+                    return new byte[] { 255, p, v, t };
+                case 3:
+                    return new byte[] { 255, p, q, v };
+                case 4:
+                    return new byte[] { 255, t, p, v };
+                default:
+                    return new byte[] { 255, v, p, q };
+            }
+        }
+
+        #endregion
+
+        #region Suffixes
+
+        /// <summary>
+        ///     Provide number of bytes and receive user friendly string. This method uses binary orders of magnitude of data (KB = kibibyte = 1024 bytes), for decimal use AsMemoryDecimal.
+        ///     Note, that for kibibyte, mebibyte and gibibyte JEDEC convention is used, i.e. KB, MB and GB respectively. This is to hold on to convention used by Windows OS, which reports memory usage in JEDEC standard. 
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="decimals">The number of decimal places in return value</param>
+        /// <param name="numberSeparator"></param>
+        /// <param name="culture"></param>
+        /// <returns>User friendly string.</returns>
+        public static string AsMemory<T>(this T bytes, byte decimals = 2, string numberSeparator = " ",
+            CultureInfo culture = null)
+            where T : IConvertible
+        {
+            var bytesConverted = Convert.ToDecimal(bytes);
+            var numberFormat = (NumberFormatInfo)(culture?.NumberFormat ?? CultureInfo.InvariantCulture.NumberFormat).Clone();
+            if (numberSeparator != null) numberFormat.NumberGroupSeparator = numberSeparator;
+
+            if (bytesConverted < Constants.KiB)
+            {
+                return $"{bytesConverted.ToString(numberFormat):n} byte{PluralizeWhenNeeded(bytesConverted)}";
+            }
+            if (bytesConverted < Constants.MiB)
+            {
+                return $"{Math.Round(bytesConverted / Constants.KiB, decimals).ToString(numberFormat):n} KB";
+            }
+            if (bytesConverted < Constants.GiB)
+            {
+                return $"{Math.Round(bytesConverted / Constants.MiB, decimals).ToString(numberFormat):n} MB";
+            }
+            if (bytesConverted < Constants.TiB)
+            {
+                return $"{Math.Round(bytesConverted / Constants.GiB, decimals).ToString(numberFormat):n} GB";
+            }
+            if (bytesConverted < Constants.PiB)
+            {
+                return $"{Math.Round(bytesConverted / Constants.TiB, decimals).ToString(numberFormat):n} TiB";
+            }
+            if (bytesConverted < Constants.EiB)
+            {
+                return $"{Math.Round(bytesConverted / Constants.PiB, decimals).ToString(numberFormat):n} PiB";
+            }
+            return $"{Math.Round(bytesConverted / Constants.EiB, decimals).ToString(numberFormat):n} EiB";
+        }
+        /// <summary>
+        ///     Provide number of bytes and receive user friendly string. This method uses decimal orders of magnitude of data (KB = kilobyte = 1000 bytes), for binary use AsMemory. 
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="decimals">The number of decimal places in return value</param>
+        /// <param name="numberSeparator"></param>
+        /// <param name="culture"></param>
+        /// <returns>User friendly string.</returns>
+        public static string AsMemoryDecimal<T>(this T bytes, byte decimals = 2, string numberSeparator = " ",
+            CultureInfo culture = null)
+            where T : IConvertible
+        {
+            var bytesConverted = Convert.ToDecimal(bytes);
+            var numberFormat = (NumberFormatInfo)(culture?.NumberFormat ?? CultureInfo.InvariantCulture.NumberFormat).Clone();
+            if (numberSeparator != null) numberFormat.NumberGroupSeparator = numberSeparator;
+
+            if (bytesConverted < Constants.Kilo)
+            {
+                return $"{bytesConverted.ToString(numberFormat):n} byte{PluralizeWhenNeeded(bytesConverted)}";
+            }
+            if (bytesConverted < Constants.Mega)
+            {
+                return $"{Math.Round(bytesConverted / Constants.Kilo, decimals).ToString(numberFormat):n} kB";
+            }
+            if (bytesConverted < Constants.Giga)
+            {
+                return $"{Math.Round(bytesConverted / Constants.Mega, decimals).ToString(numberFormat):n} MB";
+            }
+            if (bytesConverted < Constants.Tera)
+            {
+                return $"{Math.Round(bytesConverted / Constants.Giga, decimals).ToString(numberFormat):n} GB";
+            }
+            if (bytesConverted < Constants.Penta)
+            {
+                return $"{Math.Round(bytesConverted / Constants.Tera, decimals).ToString(numberFormat):n} TB";
+            }
+            if (bytesConverted < Constants.Exa)
+            {
+                return $"{Math.Round(bytesConverted / Constants.Penta, decimals).ToString(numberFormat):n} PB";
+            }
+            return $"{Math.Round(bytesConverted / Constants.Exa, decimals).ToString(numberFormat):n} EB";
+        }
+        /// <summary>
+        ///     Present miliseconds as h + min + sec and ms.
+        ///     Works like TimeSpan.FromSeconds but faster. Appends information about what is what (ex. days, hours etc.).
+        /// </summary>
+        /// <param name="timeElapsed"></param>
+        /// <returns>User friendly time string.</returns>
+        public static string AsTime(this TimeSpan timeElapsed)
+        {
+            var stb = new StringBuilder();
+
+            if (timeElapsed.Days >= 1)
+            {
+                stb.Append($"{timeElapsed.Days} day{PluralizeWhenNeeded(timeElapsed.Days)}, ");
+            }
+            if (timeElapsed.Hours != 0)
+            {
+                stb.AppendFormat($"{timeElapsed.Hours} h, ");
+            }
+            if (timeElapsed.Minutes != 0)
+            {
+                stb.AppendFormat("{0} min, ", timeElapsed.Minutes);
+            }
+            if (timeElapsed.Seconds != 0)
+            {
+                stb.AppendFormat("{0} s, ", timeElapsed.Seconds);
+            }
+            if (timeElapsed.Milliseconds != 0)
+            {
+                stb.AppendFormat("{0} ms", timeElapsed.Milliseconds);
+            }
+            return stb.ToString();
+        }
+
+        /// <summary>
+        ///     Present miliseconds as h + min + sec and ms.
+        ///     Works like TimeSpan.FromSeconds but faster. Appends information about what is what (ex. days, hours etc.).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="milliseconds"></param>
+        /// <returns>User friendly time string.</returns>
+        public static string AsTime<T>(this T milliseconds)
+            where T : IConvertible
+        {
+            var converted = Convert.ToUInt64(milliseconds);
+            var stb = new StringBuilder();
+
+            if (converted >= 86400000)
+            {
+                stb.Append(converted / 86400000);
+                stb.Append(converted < 2 * 86400000 ? " day, " : " days, ");
+                converted %= 86400000;
+            }
+            if (converted >= 3600000)
+            {
+                stb.Append(converted / 3600000);
+                stb.Append(" h, ");
+                converted %= 3600000;
+            }
+            if (converted >= 60000)
+            {
+                stb.Append(converted / 60000);
+                stb.Append(" min, ");
+                converted %= 60000;
+            }
+            if (converted >= 1000)
+            {
+                stb.Append(Math.Round(converted / 1000.0, 1).ToString(CultureInfo.InvariantCulture));
+                stb.Append(" s");
+            }
+            else
+            {
+                stb.Append(converted);
+                stb.Append(" ms");
+            }
+            return stb.ToString();
+        }
+
+        /// <summary>
+        ///     Present miliseconds as hours + minutes + seconds and milliseconds.
+        /// </summary>
+        /// <param name="milliseconds">miliseconds</param>
+        /// <returns></returns>
+        internal static string AsTimeL(this long milliseconds)
+        {
+            var stb = new StringBuilder();
+
+            if (milliseconds >= 86400000)
+            {
+                stb.Append(milliseconds / 86400000);
+                if (milliseconds < 2 * 86400000)
+                    stb.Append(" day, ");
+                else
+                    stb.Append(" days, ");
+                milliseconds %= 86400000;
+            }
+            if (milliseconds >= 3600000)
+            {
+                stb.Append(milliseconds / 3600000);
+                if (milliseconds < 2 * 3600000)
+                    stb.Append(" hour, ");
+                else
+                    stb.Append(" hours, ");
+                milliseconds %= 3600000;
+            }
+            if (milliseconds >= 60000)
+            {
+                stb.Append(milliseconds / 60000);
+                if (milliseconds < 2 * 60000)
+                    stb.Append(" minute, ");
+                else
+                    stb.Append(" minutes, ");
+                milliseconds %= 60000;
+            }
+            if (milliseconds >= 1000)
+            {
+                stb.Append(Math.Round(milliseconds / 1000.0, 1).ToString(CultureInfo.InvariantCulture));
+                if (milliseconds < 2 * 1000)
+                    stb.Append(" second");
+                else
+                    stb.Append(" seconds");
+            }
+            else
+            {
+                stb.Append(milliseconds);
+                if (milliseconds == 1)
+                    stb.Append(" millisecond");
+                else
+                    stb.Append(" milliseconds");
+            }
+            return stb.ToString();
+        }
+
+        public static string PluralizeWhenNeeded<T>(this T number)
+            where T : IConvertible
+        {
+            return Convert.ToDecimal(number) != 1 ? "s" : string.Empty;
+        }
+
+        #endregion
+
+        #region Scaling
+
+        public static double Scale(this double value, double scaleMin, double scaleMax)
+        {
+            if (scaleMin > scaleMax) throw new ArgumentOutOfRangeException(nameof(scaleMin));
+            return scaleMin + value * (scaleMax - scaleMin);
+        }
+
+        public static double Scale(this double value, double dataMin, double dataMax, double scaleMin,
+            double scaleMax)
+        {
+            var m = (scaleMax - scaleMin) / (dataMax - dataMin);
+            var c = scaleMin - dataMin * m;
+            return m * value + c;
+        }
+
+        public static IEnumerable<double> Scale(this IEnumerable<double> data, double scaleMin = 0.0D,
+            double scaleMax = 1.0D)
+        {
+            var enumerable = data as double[] ?? data.ToArray();
+            var dataMin = enumerable.Min();
+            var dataMax = enumerable.Max();
+            var m = (scaleMax - scaleMin) / (dataMax - dataMin);
+            var c = scaleMin - dataMin * m;
+            foreach (var item in enumerable)
+            {
+                yield return m * item + c;
+            }
+        }
+
+        public static IEnumerable<double> Scale<T>(this IEnumerable<T> data, double scaleMin = 0.0D,
+            double scaleMax = 1.0D) where T : IConvertible
+        {
+            var enumerable = data as T[] ?? data.ToArray();
+            var dataMin = Convert.ToDouble(enumerable.Min());
+            var dataMax = Convert.ToDouble(enumerable.Max());
+            var m = (scaleMax - scaleMin) / (dataMax - dataMin);
+            var c = scaleMin - dataMin * m;
+            foreach (var item in enumerable)
+            {
+                yield return m * Convert.ToDouble(item) + c;
+            }
+        }
+
+        public static T Fit<T>(this T value, T min, T max) where T : IComparable<T>
+        {
+            if (min.CompareTo(max) > 0)
+            {
+                throw new ArgumentException($"min ({min}) cannot be greater than max ({max})");
+            }
+            if (value.CompareTo(min) < 0)
+            {
+                return min;
+            }
+            return value.CompareTo(max) > 0 ? max : value;
+        }
+
+        #endregion
+
+        #region Reflection
+
+
+        public static string WriteToNewArray<T>(this IEnumerable<T> input)
+        {
+            var typeName = typeof(T).Name;
+            var begining = $"{typeName}[] array = new {typeName}[] {{";
+            const string end = "};";
+
+            switch (typeName)
+            {
+                case "Char":
+                case "char":
+                    return $"{begining}{input.ToCsv(',', '\'')}{end}";
+                case "String":
+                case "string":
+                    return $"{begining}{input.ToCsv(',', '\"')}{end}";
+                default:
+                    return $"{begining}{input.ToCsv()}{end}";
+            }
+        }
+
+        public static string WriteToNewArray<T>(this IEnumerable<T> input, CultureInfo info, string format = "G")
+            where T : IFormattable
+        {
+            var typeName = typeof(T).Name;
+            var begining = $"{typeName}[] array = new {typeName}[] {{";
+            const string end = "};";
+
+            switch (typeName)
+            {
+                case "Char":
+                case "char":
+                    return $"{begining}{input.ToCsv(info, format, ',', '\'')}{end}";
+                case "String":
+                case "string":
+                    return $"{begining}{input.ToCsv(info, format, ',', '\"')}{end}";
+                default:
+                    return $"{begining}{input.ToCsv(info, format)}{end}";
+            }
+        }
+
+        #endregion
+
+        #region Serialization
+        /// <summary>
+        ///     Conforms to RFC 4180 http://tools.ietf.org/html/rfc4180#page-2
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="input"></param>
+        /// <param name="separator"></param>
+        /// <param name="quotation"></param>
+        /// <returns></returns>
+        public static string ToCsv<T>(this IEnumerable<T> input, char separator = ',', char? quotation = null)
+        {
+            if (input == null) return null;
+            var csv = new StringBuilder();
+            foreach (var value in input)
+            {
+                csv.AppendFormat("{0}{1}{2}{3}", quotation, value, quotation, separator);
+            }
+            if (csv.Length != 0)
+                return csv.ToString(0, csv.Length - 1);
+            return string.Empty;
+        }
+
+        public static string ToCsv<T>(this IEnumerable<T> input, CultureInfo info, string format = "G",
+            char separator = ',', char? quotation = null) where T : IFormattable
+        {
+            if (input == null) return null;
+            var csv = new StringBuilder();
+            foreach (var value in input)
+            {
+                csv.AppendFormat("{0}{1}{2}{3}", quotation, value.ToString(format, info), quotation, separator);
+            }
+            return csv.Length != 0 ? csv.ToString(0, csv.Length - 1) : string.Empty;
+        }
+
+
+        public static XDocument SerializeToXDoc<T>(this T source)
+            where T : new()
+        {
+            var result = new XDocument();
+            var serializer = new XmlSerializer(source.GetType()); // use .GetType() instead of typeof(T) http://stackoverflow.com/a/2434558/3922292
+            using (var writer = result.CreateWriter())
+            {
+                serializer.Serialize(writer, source);
+            }
+            return result;
+        }
+
+        public static T Deserialize<T>(this XDocument serialized)
+        {
+            using (var reader = serialized.CreateReader())
+            {
+                var deserializer = new XmlSerializer(typeof(T));
+                return (T)deserializer.Deserialize(reader);
+            }
+        }
+
+        public static string Truncate(this string value, int maxLength)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+        }
+
+        #endregion
+    }
+}

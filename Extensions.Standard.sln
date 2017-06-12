@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions.Standard", "Extensions.Standard\Extensions.Standard.csproj", "{594ADC4E-9969-434C-8B2B-A7B341F16F16}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions.Standard.Test", "Extensions.Standard.Test\Extensions.Standard.Test.csproj", "{EF2A3EA2-E879-43BA-BB1D-AF1CC7B19DB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{594ADC4E-9969-434C-8B2B-A7B341F16F16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{594ADC4E-9969-434C-8B2B-A7B341F16F16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{594ADC4E-9969-434C-8B2B-A7B341F16F16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF2A3EA2-E879-43BA-BB1D-AF1CC7B19DB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF2A3EA2-E879-43BA-BB1D-AF1CC7B19DB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF2A3EA2-E879-43BA-BB1D-AF1CC7B19DB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF2A3EA2-E879-43BA-BB1D-AF1CC7B19DB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
