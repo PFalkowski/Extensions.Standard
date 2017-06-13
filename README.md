@@ -16,6 +16,7 @@ Lightweight extensions methods (and constants) for common programming tasks, lik
 - HsVtoArgb
 - Scale
 - Fit
+
 and many more.
 
 Also a useful interfces IValueEquatable and IValidatable are introduced.
