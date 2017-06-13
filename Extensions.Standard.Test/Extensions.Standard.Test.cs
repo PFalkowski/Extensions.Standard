@@ -380,63 +380,6 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
-        public void ToCsvTest1()
-        {
-            var values = new[] { 1, 2, 3, 4, 5 };
-
-            var csv = values.ToCsv(',', null);
-            var csv2 = values.ToCsv(';', '\"');
-
-            Assert.Equal("1,2,3,4,5", csv);
-            Assert.Equal("\"1\";\"2\";\"3\";\"4\";\"5\"", csv2);
-        }
-
-        [Fact]
-        public void ToCsvTestInvariantCulture()
-        {
-            var values = new[] { 1.123, 2.123, 3.234, 4.532, 5.723 };
-
-            var csv = values.ToCsv(CultureInfo.InvariantCulture, "G", ',', null);
-            var csv2 = values.ToCsv(CultureInfo.InvariantCulture, "G", ';', '\"');
-
-            var expected1 = "1.123,2.123,3.234,4.532,5.723";
-            var expected2 = @"""1.123"";""2.123"";""3.234"";""4.532"";""5.723""";
-
-
-            Assert.Equal(expected1, csv);
-            Assert.Equal(expected2, csv2);
-        }
-        ///TODO: The Turkey Test http://www.moserware.com/2008/02/does-your-code-pass-turkey-test.html
-        [Fact]
-        public void ToCsvTest2()
-        {
-            var values = new[] { 1.123, 2.123, 3.234, 4.532, 5.723 };
-            var plCulture = new CultureInfo("pl-PL");
-            var csv = values.ToCsv(plCulture, "G", ',', null);
-            var csv2 = values.ToCsv(plCulture, "G", ';', '\"');
-            var csv3 = values.ToCsv(plCulture, "F1", ';', '\"');
-            var expected1 = "1,123,2,123,3,234,4,532,5,723";
-            var expected2 = @"""1,123"";""2,123"";""3,234"";""4,532"";""5,723""";
-            var expected3 = @"""1,1"";""2,1"";""3,2"";""4,5"";""5,7""";
-            Assert.Equal(expected1, csv);
-            Assert.Equal(expected2, csv2);
-            Assert.Equal(expected3, csv3);
-        }
-
-        [Fact]
-        public void SerializeToXDocTest()
-        {
-            var tested = PersonList.SerializeToXDoc();
-            Trace.WriteLine($"Received: {tested}");
-            foreach (var person in PersonList)
-            {
-                Assert.True(tested.ToString().Contains(person.FirstName));
-                Assert.True(tested.ToString().Contains(person.LastName));
-                Assert.True(tested.ToString().Contains(person.Age.ToString()));
-            }
-        }
-
-        [Fact]
         public void RandByteTest1()
         {
             const int repeats = 100;
@@ -661,58 +604,6 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
-        public void WriteToNewArray0()
-        {
-            int[] ints = null;
-            var emptyDeclaration = ints.WriteToNewArray<int>();
-        }
-
-        [Fact]
-        public void WriteToNewArray1()
-        {
-            string s;
-            var ints = new int[0];
-            s = ((IEnumerable<int>)ints).WriteToNewArray<int>();
-            Assert.Equal<string>("Int32[] array = new Int32[] {};", s);
-        }
-
-        [Fact]
-        public void WriteToNewArray2()
-        {
-            string s;
-            var ints = new int[1];
-            s = ((IEnumerable<int>)ints).WriteToNewArray<int>();
-            Assert.Equal<string>("Int32[] array = new Int32[] {0};", s);
-        }
-
-        [Fact]
-        public void WriteToNewArray3()
-        {
-            string s;
-            var ints = new int[] { 1, 2, 3 };
-            s = ((IEnumerable<int>)ints).WriteToNewArray<int>();
-            Assert.Equal<string>("Int32[] array = new Int32[] {1,2,3};", s);
-        }
-
-        [Fact]
-        public void WriteToNewArray4()
-        {
-            string s;
-            var arr = new string[] { "abc", "d", "" };
-            s = arr.WriteToNewArray();
-            Assert.Equal<string>("String[] array = new String[] {\"abc\",\"d\",\"\"};", s);
-        }
-
-        [Fact]
-        public void WriteToNewArray5()
-        {
-            string s;
-            var arr = new char[] { 'a', 'd', '\\' };
-            s = arr.WriteToNewArray();
-            Assert.Equal<string>("Char[] array = new Char[] {\'a\',\'d\',\'\\\'};", s);
-        }
-
-        [Fact]
         public void PartitioningDefinitionTestCtor()
         {
             var tested = new PartitioningDefinition(new List<decimal> { 0.5m, 0.5m });
@@ -811,39 +702,6 @@ namespace Extensions.Standard.Test
 
             return result;
         }
-
-        public class Person // making it private breaks automatic serialization 
-        {
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-            public int Age { get; set; }
-        }
-
-
-        private List<Person> PersonList => new List<Person>
-        {   new Person
-            {
-                FirstName = "Alex",
-                LastName = "Friedman",
-                Age = 27
-            }, new Person
-            {
-                FirstName = "Jack",
-                LastName = "Bauer",
-                Age = 45
-
-            }, new Person
-            {
-                FirstName = "Cloe",
-                LastName = "O'Brien",
-                Age = 35
-            },new Person
-            {
-                FirstName = "John",
-                LastName = "Doe",
-                Age = 30
-            }
-        };
         public static double ManhattanDistanceDebug(IEnumerable<double> source, IEnumerable<double> other)
         {
             var distance = 0.0D;
