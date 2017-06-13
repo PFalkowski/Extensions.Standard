@@ -4,7 +4,7 @@
     <TargetFramework>netstandard1.4</TargetFramework>
     <Description>Lightweight extensions methods (and constants) for common programming tasks, like:
 extensions for System.Random(NextBool,NextChar,NextString etc.)
-Suffixes (AsMemory, AsTime), Serialization(ToCsv, SerializeToXDoc, Deserialize), Interpolate, Partition, Shuffle (O(n)), Softmax, InnerProduct, IsPrime, ManhattanDistance, EuclideanDistance, InClosedRange, MeanSquaredError, EqualsWithTolerance, HsVtoArgb, Scale, Fit and many more. All members are unit tested and the code is openly available at github to check/contribute: .</Description>
+Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, InnerProduct, IsPrime, ManhattanDistance, EuclideanDistance, InClosedRange, MeanSquaredError, EqualsWithTolerance, HsVtoArgb, Scale, Fit and many more. Also a useful interfces IValueEquatable and IValidatable are introduced. Members are unit tested and the code is openly available at github to check/contribute: .</Description>
     <Company>Piotr Falkowski</Company>
     <Authors>Piotr Falkowski</Authors>
     <Copyright>Piotr Falkowski © 2017</Copyright>

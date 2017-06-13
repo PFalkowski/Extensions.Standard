@@ -190,6 +190,15 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
+        public void MaxIndexFindsIndexOfBiggestElement()
+        {
+            var testData = new double[] { 1, 2, -3, 0, 5, 6, 7, -1, 2, 3, 5 };
+            var received = testData.MaxIndex();
+
+            Assert.Equal(6, received);
+        }
+
+        [Fact]
         public void Scale2Test()
         {
             const double scaleMax = 15124.0;
@@ -446,12 +455,12 @@ namespace Extensions.Standard.Test
         public void LineConstruction()
         {
             var start = new double[] { 0, 0 };
-            var testedLine = Standard.Extensions.ConstructLine(start, 10, 0);
+            var testedLine = Standard.Utilities.ConstructLine(start, 10, 0);
 
             Assert.True(testedLine[0] == 0 && testedLine[1] == 0 && testedLine[2] == 10 && testedLine[3] == 0,
                 $"wrong points: ({testedLine[0]},{testedLine[1]} {testedLine[2]},{testedLine[3]}), should be (0,0 10,0)");
 
-            testedLine = Standard.Extensions.ConstructLine(start, 10, 45);
+            testedLine = Standard.Utilities.ConstructLine(start, 10, 45);
 
             Assert.True(testedLine[0] == 0 && testedLine[1] == 0 && testedLine[2] > 5.253 && testedLine[2] < 5.254 && testedLine[3] > 8.509 && testedLine[3] < 8.51,
                 $"wrong points: ({testedLine[0]},{testedLine[1]} {testedLine[2]},{testedLine[3]}), should be (0,0 5.253,8.509)");
@@ -463,17 +472,17 @@ namespace Extensions.Standard.Test
             var anyValue = 123.45;
             var first = new double[] { 0, 0 };
             var second = new double[] { 10, 10 };
-            Assert.Equal(Standard.Extensions.Interpolate(first, second, anyValue), anyValue);
+            Assert.Equal(Standard.Utilities.Interpolate(first, second, anyValue), anyValue);
 
 
             first = new double[] { 0, 0 };
             second = new double[] { 20, 10 };
-            Assert.Equal(Standard.Extensions.Interpolate(first, second, anyValue), anyValue / 2);
+            Assert.Equal(Standard.Utilities.Interpolate(first, second, anyValue), anyValue / 2);
 
 
             first = new double[] { 0, 0 };
             second = new double[] { 10, 20 };
-            Assert.Equal(Standard.Extensions.Interpolate(first, second, anyValue), anyValue * 2);
+            Assert.Equal(Standard.Utilities.Interpolate(first, second, anyValue), anyValue * 2);
         }
 
         [Fact]
@@ -502,6 +511,49 @@ namespace Extensions.Standard.Test
             Assert.Equal(400, all.Area());
         }
 
+        [Theory]
+        [InlineData("123123123123123123")]
+        public void TruncateTruncates(string testData)
+        {
+            var received = testData.Truncate(2);
+            Assert.Equal(2, received.Length);
+            Assert.Equal("12", received);
+        }
+
+        [Theory]
+        [InlineData("1234567")]
+        public void TruncateDoesNotTruncateIfNotNeede(string testData)
+        {
+            var received = testData.Truncate(12);
+            Assert.Equal(7, received.Length);
+            Assert.Equal(testData, received);
+        }
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void TruncateDoesNothingOnEmptyStringOrNull(string testData)
+        {
+            var received = Utilities.Truncate(testData, 2);
+            Assert.Equal(testData, received);
+        }
+        [Fact]
+        public void MeanSquareErrorCalculatesValidResult()
+        {
+            var testDataA = new double[] { 1, 2, 3, 4, 5 };
+            var testDataB = new double[] { 11, 12, 13, 14, 15 };
+
+            var received = testDataA.MeanSquareError(testDataB);
+            Assert.Equal(100, received);
+        }
+        [Fact]
+        public void RootMeanSquareErrorCalculatesValidResult()
+        {
+            var testDataA = new double[] { 1, 2, 3, 4, 5 };
+            var testDataB = new double[] { 11, 12, 13, 14, 15 };
+
+            var received = testDataA.RootMeanSquareError(testDataB);
+            Assert.Equal(10, received);
+        }
         [Fact]
         public void ShuffleTest1()
         {
@@ -545,7 +597,7 @@ namespace Extensions.Standard.Test
         public void PartitionTestException1()
         {
             List<double> blahblah = null;
-            Assert.Throws<ArgumentNullException>(() => Standard.Extensions.Partition(blahblah, .5m));
+            Assert.Throws<ArgumentNullException>(() => Standard.Utilities.Partition(blahblah, .5m));
         }
 
         [Fact]

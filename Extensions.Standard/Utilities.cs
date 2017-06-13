@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace Extensions.Standard
 {
-    public static partial class Extensions
+    public static partial class Utilities
     {
         #region Primes
 
@@ -37,17 +37,7 @@ namespace Extensions.Standard
         #endregion
 
         #region Geometry
-
-        /// <summary>
-        /// Hyperbolic secant (Sech(x)). Derivative of Tanh when squared.
-        /// </summary>
-        /// <param name="val"></param>
-        /// <returns></returns>
-        public static double Sech(double val)
-        {
-            return 2 / (Math.Exp(val) + Math.Exp(-val));
-        }
-
+        
         public static double ToDegrees(this double radians)
         {
             return radians * (180.0 / Math.PI);
@@ -135,23 +125,22 @@ namespace Extensions.Standard
         }
 
         /// <summary>
-        ///     Mean Squared Error.
+        ///     The Mean Squared Error (MSE) is a measure of how close a fitted line is to data points.
         ///     The difference between values implied by an estimator and the true values.
         ///     Average of the squares of the differences.
-        ///     MSE multiplied by N(number of samples ) is equal sample Variance.
-        ///     Square root of MSE is the Euclidean distance of average data point to average true value. Points coordinates may be
+        ///     MSE multiplied by N(number of samples ) is equal sample Variance. Points coordinates may be
         ///     either: for one axis only (than invariant X axis is assumed) or X and Y values at same indexes.
         /// </summary>
         /// <param name="predicted"></param>
-        /// <param name="trueValue"></param>
+        /// <param name="trueValues"></param>
         /// <returns></returns>
         /// reference: http://en.wikipedia.org/wiki/Mean_squared_error
-        public static double Mse(this IEnumerable<double> predicted, IEnumerable<double> trueValue)
+        public static double MeanSquareError(this IEnumerable<double> predicted, IEnumerable<double> trueValues)
         {
             var distance = 0.0D;
             var c = 0;
             using (var predIter = predicted.GetEnumerator())
-            using (var expectedIter = trueValue.GetEnumerator())
+            using (var expectedIter = trueValues.GetEnumerator())
             {
                 while (predIter.MoveNext() && expectedIter.MoveNext())
                 {
@@ -160,6 +149,18 @@ namespace Extensions.Standard
                 }
             }
             return distance / c;
+        }
+        /// <summary>
+        ///     RMSE is the average distance of a data point from the fitted line, measured along a vertical line.
+        ///     Square root of MSE is the Euclidean distance of average data point to average true value. Points coordinates may be
+        ///     either: for one axis only (than invariant X axis is assumed) or X and Y values at same indexes.
+        /// </summary>
+        /// <param name="predicted"></param>
+        /// <param name="trueValues"></param>
+        /// <returns></returns>
+        public static double RootMeanSquareError(this IEnumerable<double> predicted, IEnumerable<double> trueValues)
+        {
+            return Math.Sqrt(predicted.MeanSquareError(trueValues));
         }
         #endregion
 
