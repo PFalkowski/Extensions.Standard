@@ -10,10 +10,10 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <Copyright>Piotr Falkowski © 2017</Copyright>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/PFalkowski/Extensions.Standard</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
-  </ItemGroup>
 
 </Project>
