@@ -148,6 +148,7 @@ namespace Extensions.Standard
             }
             return distance / c;
         }
+
         /// <summary>
         ///     RMSE is the average distance of a data point from the fitted line, measured along a vertical line.
         ///     Square root of MSE is the Euclidean distance of average data point to average true value. Points coordinates may be
@@ -161,10 +162,10 @@ namespace Extensions.Standard
         {
             return Math.Sqrt(predicted.MeanSquareError(trueValues));
         }
+
         #endregion
 
         #region Sequence algorithms
-
 
         /// <summary>
         ///     Softmax that doesn't choke on Lists larger than 200. See: http://stackoverflow.com/q/9906136
@@ -286,6 +287,7 @@ namespace Extensions.Standard
             }
             return true;
         }
+
         /// <summary>
         /// Largest value index. If the sequence contains more than one, first occurence's index will be returned.
         /// </summary>
@@ -419,6 +421,7 @@ namespace Extensions.Standard
             }
             return $"{Math.Round(bytesConverted / Constants.EiB, decimals).ToString(numberFormat):n} EiB";
         }
+
         /// <summary>
         ///     Provide number of bytes and receive user friendly string. This method uses decimal orders of magnitude of data (KB = kilobyte = 1000 bytes), for binary use AsMemory. 
         /// </summary>
@@ -461,6 +464,7 @@ namespace Extensions.Standard
             }
             return $"{Math.Round(bytesConverted / Constants.Exa, decimals).ToString(numberFormat):n} EB";
         }
+
         /// <summary>
         ///     Present miliseconds as h + min + sec and ms.
         ///     Works like TimeSpan.FromSeconds but faster. Appends information about what is what (ex. days, hours etc.).
@@ -661,6 +665,5 @@ namespace Extensions.Standard
             return value.Length <= maxLength ? value : value.Substring(0, maxLength);
         }
         #endregion
-
     }
 }
