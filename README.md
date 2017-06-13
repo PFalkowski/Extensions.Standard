@@ -18,6 +18,6 @@ Lightweight extensions methods (and constants) for common programming tasks, lik
 
 and many more.
 
-extensions for System.Random(NextBool, NextChar, NextString etc.) can be found in separate repo 
+extensions for System.Random(NextBool, NextChar, NextString etc.) can be found in separate repo: https://github.com/PFalkowski/StrongRandom
 
 Also a useful interfces IValueEquatable and IValidatable are introduced.
