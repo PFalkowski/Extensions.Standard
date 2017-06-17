@@ -112,61 +112,14 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
-        public void SequenceEqualsGenericEqualsEqualSeqence()
-        {
-            var tested1 = new[] { "a", "test", "equal", "seq" }.ToList();
-
-            var tested2 = new[] { "a", "test", "equal", "seq" };
-
-            Assert.True(tested1.SequenceEquals(tested1));
-            Assert.True(tested1.SequenceEquals(tested2));
-            Assert.True(tested2.SequenceEquals(tested1));
-            Assert.True(tested2.SequenceEquals(tested2));
-        }
-
-
-        [Fact]
-        public void SequenceEqualsGenericRetuirnsFalseForDifferentSequences()
-        {
-            var tested1 = new[] { "a", "test", "equal", "seq" }.ToList();
-
-            var tested2 = new[] { "definitely", "not", "equal", "seq" };
-
-            Assert.False(tested1.SequenceEquals(tested2));
-            Assert.False(tested2.SequenceEquals(tested1));
-        }
-
-        [Fact]
-        public void SequenceEqualsGenericRetuirnsFalseForSequencesOfDifferentSize()
-        {
-            var tested1 = new[] { "a", "test", "equal", "seq" }.ToList();
-
-            var tested2 = new[] { "a", "test", "equal" };
-
-            Assert.False(tested1.SequenceEquals(tested2));
-            Assert.False(tested2.SequenceEquals(tested1));
-        }
-
-        [Fact]
-        public void SequenceEqualsReturnsFalseForNullAndNotNullSeq()
-        {
-            string[] tested1 = null;
-
-            var tested2 = new[] { "a", "test", "equal" };
-
-            Assert.False(tested1.SequenceEquals(tested2));
-            Assert.False(tested2.SequenceEquals(tested1));
-        }
-
-        [Fact]
         public void SequenceEqualsTreatsTwoNullSeqAsEqual()
         {
-            string[] tested1 = null;
+            double[] tested1 = null;
 
-            string[] tested2 = null;
+            double[] tested2 = null;
 
-            Assert.True(tested1.SequenceEquals(tested2));
-            Assert.True(tested2.SequenceEquals(tested1));
+            Assert.True(tested1.SequenceEquals(tested2, 0.1));
+            Assert.True(tested2.SequenceEquals(tested1, 0.1));
         }
 
         [Fact]
@@ -176,8 +129,8 @@ namespace Extensions.Standard.Test
 
             var tested2 = new[] { 1.0, 1.0, 1.0 };
 
-            Assert.False(tested1.SequenceEquals(tested2));
-            Assert.False(tested2.SequenceEquals(tested1));
+            Assert.False(tested1.SequenceEquals(tested2, 0.1));
+            Assert.False(tested2.SequenceEquals(tested1, 0.1));
         }
 
         [Fact]
