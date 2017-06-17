@@ -288,6 +288,24 @@ namespace Extensions.Standard
             return true;
         }
 
+        public static bool SequenceEquals<T>(this IEnumerable<T> seqenceA, IEnumerable<T> seqenceB)
+        {
+            if (seqenceA == null && seqenceB == null) return true;
+            if (seqenceA == null || seqenceB == null) return false;
+            var listA = seqenceA as IList<T> ?? seqenceA.ToList();
+            var listB = seqenceB as IList<T> ?? seqenceB.ToList();
+            if (listA.Count != listB.Count) return false;
+            using (var e1 = listA.GetEnumerator())
+            using (var e2 = listB.GetEnumerator())
+            {
+                while (e1.MoveNext() && e2.MoveNext())
+                {
+                    if (!e1.Current.Equals(e2.Current)) return false;
+                }
+            }
+            return true;
+        }
+
         /// <summary>
         /// Largest value index. If the sequence contains more than one, first occurence's index will be returned.
         /// </summary>
