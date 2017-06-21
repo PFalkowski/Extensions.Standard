@@ -287,7 +287,7 @@ namespace Extensions.Standard
             }
             return true;
         }
-
+        
         /// <summary>
         /// Largest value index. If the sequence contains more than one, first occurence's index will be returned.
         /// </summary>

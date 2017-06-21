@@ -30,7 +30,7 @@
         public const ulong Penta = Tera * 1000;
 
         /// <summary>
-        ///     1000000000000000
+        ///     1000000000000000000
         /// </summary>
         public const ulong Exa = Penta * 1000;
 

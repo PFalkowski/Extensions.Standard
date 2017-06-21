@@ -88,8 +88,10 @@ namespace Extensions.Standard.Test
             var tested1 = new[] { 1.0, 2.0, 0.1, -0.2, -0.999, -5.0, 99999 };
 
             var tested2 = new[] { 1.0, 2.0, 0.1, -0.2, -0.999, -5.0, 99999 };
+
             var result = tested1.SequenceEquals(tested2, 0);
             Assert.True(result);
+
             result = tested1.SequenceEquals(tested2, double.Epsilon);
             Assert.True(result);
 
@@ -99,11 +101,32 @@ namespace Extensions.Standard.Test
             result = tested1.SequenceEquals(tested2, 1000000);
             Assert.True(result);
 
-
             tested2 = new[] { 1.000001, 1.999999, 0.10000001, -0.2, -0.999, -5.0, 99999 };
 
             result = tested1.SequenceEquals(tested2, 0.000001);
             Assert.True(result);
+        }
+
+        [Fact]
+        public void SequenceEqualsTreatsTwoNullSeqAsEqual()
+        {
+            double[] tested1 = null;
+
+            double[] tested2 = null;
+
+            Assert.True(tested1.SequenceEquals(tested2, 0.1));
+            Assert.True(tested2.SequenceEquals(tested1, 0.1));
+        }
+
+        [Fact]
+        public void SequenceEqualsWithToleranceReturnsFalseForNullAndNotNullSeq()
+        {
+            double[] tested1 = null;
+
+            var tested2 = new[] { 1.0, 1.0, 1.0 };
+
+            Assert.False(tested1.SequenceEquals(tested2, 0.1));
+            Assert.False(tested2.SequenceEquals(tested1, 0.1));
         }
 
         [Fact]
