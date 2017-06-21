@@ -35,7 +35,7 @@ namespace Extensions.Standard
         #endregion
 
         #region Geometry
-        
+
         public static double ToDegrees(this double radians)
         {
             return radians * (180.0 / Math.PI);
@@ -589,7 +589,7 @@ namespace Extensions.Standard
             else
             {
                 stb.Append(milliseconds);
-                    stb.Append(" millisecond".PluralizeWhenNeeded(milliseconds));
+                stb.Append(" millisecond".PluralizeWhenNeeded(milliseconds));
             }
             return stb.ToString();
         }
@@ -603,15 +603,24 @@ namespace Extensions.Standard
         #endregion
 
         #region Scaling
+        
+        private static double ScaleSafe(this double value, double scaleMin, double scaleMax)
+        {
+            return scaleMin + value * scaleMax - value * scaleMin;
+        }
 
         public static double Scale(this double value, double scaleMin, double scaleMax)
         {
             if (scaleMin > scaleMax) throw new ArgumentOutOfRangeException(nameof(scaleMin));
-            return scaleMin + value * (scaleMax - scaleMin);
+            var tmp = value * (scaleMax - scaleMin);
+            if (double.IsInfinity(tmp) && value.InClosedRange(0.0, 1.0))
+            {
+                return value.ScaleSafe(scaleMin, scaleMax);
+            }
+            return scaleMin + tmp;
         }
 
-        public static double Scale(this double value, double dataMin, double dataMax, double scaleMin,
-            double scaleMax)
+        public static double Scale(this double value, double dataMin, double dataMax, double scaleMin, double scaleMax)
         {
             var m = (scaleMax - scaleMin) / (dataMax - dataMin);
             var c = scaleMin - dataMin * m;

@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics.CodeAnalysis;
-using Extensions;
 using Xunit;
 using NSubstitute;
 
@@ -133,15 +129,152 @@ namespace Extensions.Standard.Test
             Assert.Equal(Math.Round(expected, Precision), Math.Round(received, Precision));
         }
 
-        [Fact]
-        public void ScaleTestBorderCase1()
+        [Theory]
+        [InlineData(0.5)]
+        [InlineData(1.0)]
+        [InlineData(5.0)]
+        [InlineData(15.0)]
+        [InlineData(22.2)]
+        [InlineData(121.1)]
+        public void ScaleReturnsScaledValue(double value)
         {
             const double max = 129.43;
             const double min = 124.123;
+            var expected = min + value * (max - min);
+            var received = value.Scale(min, max);
+            Assert.Equal(Math.Round(expected, Precision), Math.Round(received, Precision));
+        }
+
+        public double GetScalingMaxMin(double value)
+        {
+            if (!value.InClosedRange(-1, 1))
+            {
+                return double.MaxValue / 2 / value;
+            }
+            else
+            {
+                return (double.MaxValue / 2) * value;
+            }
+        }
+
+        [Fact]
+        public void saveRanegsForScaling()
+        {
+            const int rangeMax = 1000;
+            var stb = new StringBuilder();
+            NumberFormatInfo nfi = new NumberFormatInfo { NumberDecimalSeparator = "." };
+            stb.Append("value,minimal min,maximal max,");
+            for (int i = -rangeMax; i < rangeMax; ++i)
+            {
+                var res = GetScalingMaxMin(i);
+                stb.AppendLine($"{i.ToString(nfi)},{(-res).ToString(nfi)},{res.ToString(nfi)}");
+                Assert.False(double.IsInfinity(res - -res));
+            }
+            var toSave = stb.ToString();
+            //File.AppendAllText("res.csv", toSave);
+        }
+
+        [Theory]
+        [InlineData(2)]
+        //[InlineData(0.3)]
+        //[InlineData(-0.3)]
+        //[InlineData(-0.2)]
+        public void ScaleTestBorderCase10(double factor)
+        {
+            double max = 10;
+            double min = -10;
+            double value = factor;
+            var received = value.Scale(min, max);
+            Assert.False(double.IsInfinity(received));
+        }
+
+        [Fact]
+        public void ScalingTests()
+        {
+
+        }
+
+        [Theory]
+        [InlineData(1e+200)]
+        public void ScaleTestBorderCase110(double factor)
+        {
+            double max = 1e+77;
+            double min = -1e+77;
+            double value = factor;
+            var received = value.Scale(min, max);
+            Assert.False(double.IsInfinity(received));
+        }
+
+        [Theory]
+        [InlineData(1E+2)]
+        [InlineData(1E+10)]
+        [InlineData(1E+100)]
+        [InlineData(1E+150)]
+        public void ScaleTestBorderCase112(double factor)
+        {
+            double max = factor;
+            double min = -factor;
+            double value = factor;
+            var received = value.Scale(min, max);
+            Assert.False(double.IsInfinity(received));
+        }
+
+        [Fact]
+        public void ScaleTestBorderCase11()
+        {
+            var half = 0.5.Scale(double.MinValue - 1E+10, double.MaxValue);
+            var two = 2.0.Scale(double.MinValue / 2, double.MaxValue / 2);
+        }
+        [Fact]
+        public void ScaleTestBorderCase0()
+        {
+            const double max = double.MaxValue / 1.5;
+            const double min = double.MinValue / 1.5;
+            const double value = 0.99;
+            var received = value.Scale(min, max);
+            var expected = min + value * max - value * min;
+            Assert.Equal(Math.Round(expected, Precision), Math.Round(received, Precision));
+        }
+
+        [Fact]
+        public void ScaleTestBorderCase1()
+        {
+            const double max = 0;
+            const double min = double.MinValue;
             const double value = 1.0;
             var received = value.Scale(min, max);
             Assert.Equal(Math.Round(max, Precision), Math.Round(received, Precision));
         }
+
+        [Fact]
+        public void ScaleTestBorderCase2()
+        {
+            const double max = double.MaxValue;
+            const double min = 0;
+            const double value = 1.0;
+            var received = value.Scale(min, max);
+            Assert.Equal(Math.Round(max, Precision), Math.Round(received, Precision));
+        }
+
+        //[Fact]
+        //public void SubtractionSignReturnsTrueIfResultIsPositive()
+        //{
+        //    var a = 15.0;
+        //    var b = 10.0;
+        //    var expected = true;
+        //    var recived = (a).SubtractionSign(b);
+        //    Assert.Equal(expected, recived);
+        //}
+
+        //[Fact]
+        //public void SubtractionSignReturnsFalseIfResultIsNegative()
+        //{
+        //    var a = -5.0;
+        //    var b = 10;
+        //    var expected = false;
+        //    var recived = (a).SubtractionSign(b);
+        //    Assert.Equal(expected, recived);
+        //}
 
         [Fact]
         public void InOpenRangeTest()
@@ -309,30 +442,52 @@ namespace Extensions.Standard.Test
 
             Assert.Equal(manhattanDistance, sequence1.ManhattanDistance(sequence2));
         }
-
-        [Fact]
-        public void IsPrime()
+        /// <summary>
+        /// compare with http://compoasso.free.fr/primelistweb/page/prime/liste_online_en.php
+        /// </summary>
+        /// <param name="num">a prime</param>
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        [InlineData(5)]
+        [InlineData(7)]
+        [InlineData(11)]
+        [InlineData(37)]
+        [InlineData(29)]
+        [InlineData(109)]
+        [InlineData(521)]
+        [InlineData(997)]
+        [InlineData(101489)]
+        [InlineData(104729)]
+        [InlineData(1686049)]
+        [InlineData(157491121)]
+        [InlineData(177488767)]
+        [InlineData(111111293)]
+        [InlineData(223253)]
+        public void IsPrimeReturnsTrueForPrimeIntegers(int num)
         {
-            Assert.False(10000000.IsPrime(), "10000000 is not a prime");
-            Assert.False(0.IsPrime(), "0 is not a prime.");
-            Assert.False((-1).IsPrime(), "-1 is not a prime.");
-            Assert.False((-2).IsPrime(), "-2 is not a prime.");
-            Assert.False((-3).IsPrime(), "-3 is not a prime.");
-            Assert.False((-6).IsPrime(), "-6 is not a prime.");
-            Assert.False(6.IsPrime(), "6 is not a prime.");
-            Assert.False(1.IsPrime(), "1 is not a prime.");
-            Assert.False((-1).IsPrime(), "-1 is not a prime.");
-            Assert.False((-10).IsPrime(), "-10 is not a prime.");
-            Assert.False((-5).IsPrime(), "-5 is not a prime.");
-            Assert.False((-20).IsPrime(), "-20 is not a prime.");
-            Assert.False(20.IsPrime(), "20 is not a prime.");
-            Assert.True(2.IsPrime(), "2 is prime.");
-            Assert.True(3.IsPrime(), "3 is prime.");
-            Assert.True(5.IsPrime(), "5 is prime.");
-            Assert.True(29.IsPrime(), "29 is a prime number");
-            Assert.True(997.IsPrime(), "997 is prime.");
-            Assert.True(1686049.IsPrime(), "1686049 is prime.");
-            Assert.True(521.IsPrime(), "521 is prime.");
+            Assert.True(num.IsPrime());
+        }
+        [Theory]
+        [InlineData(10000000)]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [InlineData(-2)]
+        [InlineData(-3)]
+        [InlineData(-5)]
+        [InlineData(6)]
+        [InlineData(1)]
+        [InlineData(-10)]
+        [InlineData(10)]
+        [InlineData(20)]
+        [InlineData(99)]
+        [InlineData(999997)]
+        [InlineData(10003290)]
+        [InlineData(22222222)]
+        [InlineData(33333333)]
+        public void IsPrimeReturnsFalseForNotPrimeIntegers(int num)
+        {
+            Assert.False(num.IsPrime());
         }
 
         [Fact]
@@ -488,6 +643,7 @@ namespace Extensions.Standard.Test
             Assert.Equal(7, received.Length);
             Assert.Equal(testData, received);
         }
+
         [Theory]
         [InlineData("")]
         [InlineData(null)]
@@ -496,6 +652,7 @@ namespace Extensions.Standard.Test
             var received = Utilities.Truncate(testData, 2);
             Assert.Equal(testData, received);
         }
+
         [Fact]
         public void MeanSquareErrorCalculatesValidResult()
         {
@@ -505,6 +662,7 @@ namespace Extensions.Standard.Test
             var received = testDataA.MeanSquareError(testDataB);
             Assert.Equal(100, received);
         }
+
         [Fact]
         public void RootMeanSquareErrorCalculatesValidResult()
         {
@@ -514,6 +672,7 @@ namespace Extensions.Standard.Test
             var received = testDataA.RootMeanSquareError(testDataB);
             Assert.Equal(10, received);
         }
+
         [Fact]
         public void ShuffleTest1()
         {
