@@ -168,40 +168,38 @@ namespace Extensions.Standard.Test
             Assert.Equal(Math.Round(expected, Precision), Math.Round(received, Precision));
         }
 
-        public double GetScalingMaxMin(double value)
-        {
-            if (!value.InClosedRange(-1, 1))
-            {
-                return double.MaxValue / 2 / value;
-            }
-            else
-            {
-                return (double.MaxValue / 2) * value;
-            }
-        }
+        //public double GetScalingMaxMin(double value)
+        //{
+        //    if (!value.InClosedRange(-1, 1))
+        //    {
+        //        return double.MaxValue / 2 / value;
+        //    }
+        //    else
+        //    {
+        //        return (double.MaxValue / 2) * value;
+        //    }
+        //}
 
-        [Fact]
-        public void saveRanegsForScaling()
-        {
-            const int rangeMax = 1000;
-            var stb = new StringBuilder();
-            NumberFormatInfo nfi = new NumberFormatInfo { NumberDecimalSeparator = "." };
-            stb.Append("value,minimal min,maximal max,");
-            for (int i = -rangeMax; i < rangeMax; ++i)
-            {
-                var res = GetScalingMaxMin(i);
-                stb.AppendLine($"{i.ToString(nfi)},{(-res).ToString(nfi)},{res.ToString(nfi)}");
-                Assert.False(double.IsInfinity(res - -res));
-            }
-            var toSave = stb.ToString();
-            //File.AppendAllText("res.csv", toSave);
-        }
+        //[Fact]
+        //public void saveRanegsForScaling()
+        //{
+        //    const int rangeMax = 1000;
+        //    var stb = new StringBuilder();
+        //    NumberFormatInfo nfi = new NumberFormatInfo { NumberDecimalSeparator = "." };
+        //    stb.Append("value,minimal min,maximal max,");
+        //    for (int i = -rangeMax; i < rangeMax; ++i)
+        //    {
+        //        var res = GetScalingMaxMin(i);
+        //        stb.AppendLine($"{i.ToString(nfi)},{(-res).ToString(nfi)},{res.ToString(nfi)}");
+        //        Assert.False(double.IsInfinity(res - -res));
+        //    }
+        //    var toSave = stb.ToString();
+        //    //File.AppendAllText("res.csv", toSave);
+        //}
 
         [Theory]
         [InlineData(2)]
-        //[InlineData(0.3)]
-        //[InlineData(-0.3)]
-        //[InlineData(-0.2)]
+        [InlineData(0.3)]
         public void ScaleTestBorderCase10(double factor)
         {
             double max = 10;
@@ -209,12 +207,6 @@ namespace Extensions.Standard.Test
             double value = factor;
             var received = value.Scale(min, max);
             Assert.False(double.IsInfinity(received));
-        }
-
-        [Fact]
-        public void ScalingTests()
-        {
-
         }
 
         [Theory]
@@ -278,26 +270,6 @@ namespace Extensions.Standard.Test
             var received = value.Scale(min, max);
             Assert.Equal(Math.Round(max, Precision), Math.Round(received, Precision));
         }
-
-        //[Fact]
-        //public void SubtractionSignReturnsTrueIfResultIsPositive()
-        //{
-        //    var a = 15.0;
-        //    var b = 10.0;
-        //    var expected = true;
-        //    var recived = (a).SubtractionSign(b);
-        //    Assert.Equal(expected, recived);
-        //}
-
-        //[Fact]
-        //public void SubtractionSignReturnsFalseIfResultIsNegative()
-        //{
-        //    var a = -5.0;
-        //    var b = 10;
-        //    var expected = false;
-        //    var recived = (a).SubtractionSign(b);
-        //    Assert.Equal(expected, recived);
-        //}
 
         [Fact]
         public void InOpenRangeTest()
