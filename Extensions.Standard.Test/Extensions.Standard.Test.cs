@@ -112,8 +112,8 @@ namespace Extensions.Standard.Test
 
             double[] tested2 = null;
 
-            Assert.True(tested1.SequenceEquals(tested2, 0.1));
-            Assert.True(tested2.SequenceEquals(tested1, 0.1));
+            Assert.True(tested1.SequenceEquals((double[]) null, 0.1));
+            Assert.True(tested2.SequenceEquals((double[]) null, 0.1));
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace Extensions.Standard.Test
             var tested2 = new[] { 1.0, 1.0, 1.0 };
 
             Assert.False(tested1.SequenceEquals(tested2, 0.1));
-            Assert.False(tested2.SequenceEquals(tested1, 0.1));
+            Assert.False(tested2.SequenceEquals((double[]) null, 0.1));
         }
 
         [Fact]
@@ -202,7 +202,7 @@ namespace Extensions.Standard.Test
         {
             double max = 10;
             double min = -10;
-            double value = factor;
+            var value = factor;
             var received = value.Scale(min, max);
             Assert.False(double.IsInfinity(received));
         }
@@ -211,9 +211,9 @@ namespace Extensions.Standard.Test
         [InlineData(1e+200)]
         public void ScaleTestBorderCase110(double factor)
         {
-            double max = 1e+77;
-            double min = -1e+77;
-            double value = factor;
+            var max = 1e+77;
+            var min = -1e+77;
+            var value = factor;
             var received = value.Scale(min, max);
             Assert.False(double.IsInfinity(received));
         }
@@ -225,9 +225,9 @@ namespace Extensions.Standard.Test
         [InlineData(1E+150)]
         public void ScaleTestBorderCase112(double factor)
         {
-            double max = factor;
-            double min = -factor;
-            double value = factor;
+            var max = factor;
+            var min = -factor;
+            var value = factor;
             var received = value.Scale(min, max);
             Assert.False(double.IsInfinity(received));
         }
@@ -389,9 +389,8 @@ namespace Extensions.Standard.Test
         public void InnerProductTest3()
         {
             var sequence1 = new[] { -1.0, 1.0, -123.9, 123, -99999.7 };
-            List<double> sequence2 = null;
 
-            Assert.Throws<ArgumentNullException>(() => sequence1.InnerProduct(sequence2, 0.0, (result, x, y) => result + x * y));
+            Assert.Throws<ArgumentNullException>(() => sequence1.InnerProduct((List<double>) null, 0.0, (result, x, y) => result + x * y));
         }
 
         [Fact]
@@ -488,7 +487,7 @@ namespace Extensions.Standard.Test
         {
             var testedAmount = 1;
             var tested = testedAmount.AsMemory();
-            Assert.True(tested.StartsWith("1 "));
+            Assert.StartsWith("1 ", tested);
             Assert.Equal("1 byte", tested);
         }
 
@@ -563,12 +562,12 @@ namespace Extensions.Standard.Test
         public void LineConstruction()
         {
             var start = new double[] { 0, 0 };
-            var testedLine = Standard.Utilities.ConstructLine(start, 10, 0);
+            var testedLine = Utilities.ConstructLine(start, 10, 0);
 
             Assert.True(testedLine[0] == 0 && testedLine[1] == 0 && testedLine[2] == 10 && testedLine[3] == 0,
                 $"wrong points: ({testedLine[0]},{testedLine[1]} {testedLine[2]},{testedLine[3]}), should be (0,0 10,0)");
 
-            testedLine = Standard.Utilities.ConstructLine(start, 10, 45);
+            testedLine = Utilities.ConstructLine(start, 10, 45);
 
             Assert.True(testedLine[0] == 0 && testedLine[1] == 0 && testedLine[2] > 5.253 && testedLine[2] < 5.254 && testedLine[3] > 8.509 && testedLine[3] < 8.51,
                 $"wrong points: ({testedLine[0]},{testedLine[1]} {testedLine[2]},{testedLine[3]}), should be (0,0 5.253,8.509)");
@@ -580,17 +579,17 @@ namespace Extensions.Standard.Test
             var anyValue = 123.45;
             var first = new double[] { 0, 0 };
             var second = new double[] { 10, 10 };
-            Assert.Equal(Standard.Utilities.Interpolate(first, second, anyValue), anyValue);
+            Assert.Equal(Utilities.Interpolate(first, second, anyValue), anyValue);
 
 
             first = new double[] { 0, 0 };
             second = new double[] { 20, 10 };
-            Assert.Equal(Standard.Utilities.Interpolate(first, second, anyValue), anyValue / 2);
+            Assert.Equal(Utilities.Interpolate(first, second, anyValue), anyValue / 2);
 
 
             first = new double[] { 0, 0 };
             second = new double[] { 10, 20 };
-            Assert.Equal(Standard.Utilities.Interpolate(first, second, anyValue), anyValue * 2);
+            Assert.Equal(Utilities.Interpolate(first, second, anyValue), anyValue * 2);
         }
 
         [Fact]
@@ -603,7 +602,7 @@ namespace Extensions.Standard.Test
 
             var all = new List<double[]> { first, second, third, fourth };
 
-            Assert.Equal(all.Area(), 100);
+            Assert.Equal(100, all.Area());
 
             first = new double[] { -10, -10 };
             second = new double[] { -10, 10 };
@@ -708,8 +707,7 @@ namespace Extensions.Standard.Test
         [Fact]
         public void PartitionTestException1()
         {
-            List<double> blahblah = null;
-            Assert.Throws<ArgumentNullException>(() => Standard.Utilities.Partition(blahblah, .5m));
+            Assert.Throws<ArgumentNullException>(() => ((List<double>) null).Partition(.5m));
         }
 
         [Fact]
@@ -723,7 +721,7 @@ namespace Extensions.Standard.Test
         public void PartitionTestException3()
         {
             const decimal inccorectRatio = 1.1m;
-            List<double> blahblah = new List<double> { .5, .6 };
+            var blahblah = new List<double> { .5, .6 };
             Assert.Throws<ArgumentOutOfRangeException>(() => blahblah.Partition(inccorectRatio));
         }
 
@@ -731,7 +729,7 @@ namespace Extensions.Standard.Test
         public void PartitionTestException4()
         {
             const decimal inccorectRatio = 0.0m;
-            List<double> blahblah = new List<double> { .5, .6 };
+            var blahblah = new List<double> { .5, .6 };
 
             Assert.Throws<ArgumentOutOfRangeException>(() => blahblah.Partition(inccorectRatio));
         }
@@ -742,10 +740,10 @@ namespace Extensions.Standard.Test
             const double item1 = .5;
             const double item2 = .6;
             const decimal ratio = 0.5m;
-            List<double> blahblah = new List<double> { item1, item2 };
+            var blahblah = new List<double> { item1, item2 };
             var result = blahblah.Partition(ratio);
-            Assert.Equal(result[0].Count, 1);
-            Assert.Equal(result[1].Count, 1);
+            Assert.Single(result[0]);
+            Assert.Single(result[1]);
             Assert.Equal(result[0].First(), item1);
             Assert.Equal(result[1].First(), item2);
         }
@@ -758,10 +756,10 @@ namespace Extensions.Standard.Test
             const double item3 = .7;
             const decimal ratio = 2.0m / 3.0m;
 
-            List<double> blahblah = new List<double> { item1, item2, item3 };
+            var blahblah = new List<double> { item1, item2, item3 };
             var result = blahblah.Partition(ratio);
-            Assert.Equal(result[0].Count, 2);
-            Assert.Equal(result[1].Count, 1);
+            Assert.Equal(2, result[0].Count);
+            Assert.Single(result[1]);
             Assert.Equal(result[0][0], item1);
             Assert.Equal(result[0][1], item2);
             Assert.Equal(result[1][0], item3);
@@ -855,8 +853,7 @@ namespace Extensions.Standard.Test
 
         #region Unit test related
 
-
-        public static IList<double> SoftmaxNaive(IList<double> input)
+        private static IList<double> SoftmaxNaive(IList<double> input)
         {
             var sum = input.Sum(t => Math.Exp(t));
 
@@ -866,7 +863,8 @@ namespace Extensions.Standard.Test
 
             return result;
         }
-        public static double ManhattanDistanceDebug(IEnumerable<double> source, IEnumerable<double> other)
+
+        private static double ManhattanDistanceDebug(IEnumerable<double> source, IEnumerable<double> other)
         {
             var distance = 0.0D;
             using (var xIter = source.GetEnumerator())
@@ -879,7 +877,8 @@ namespace Extensions.Standard.Test
             }
             return distance;
         }
-        public static double EuclideanDistanceDebug(IEnumerable<double> source, IEnumerable<double> other)
+
+        private static double EuclideanDistanceDebug(IEnumerable<double> source, IEnumerable<double> other)
         {
             var distance = 0.0D;
             using (var xIter = source.GetEnumerator())
