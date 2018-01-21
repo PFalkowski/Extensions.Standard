@@ -63,7 +63,7 @@ namespace Extensions.Standard
         }
 
         /// <summary>
-        ///     Calculate area of polygon.
+        ///     Calculate area of a polygon defined by points in <paramref name="polygon"/>.
         /// </summary>
         /// <param name="polygon">Should contain consecutive points, index 0 for x and 1 for y. Further values will be omited.</param>
         /// <returns>Area</returns>

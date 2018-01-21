@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
 using Xunit;
 using NSubstitute;
 
@@ -743,9 +741,9 @@ namespace Extensions.Standard.Test
         {
             const double item1 = .5;
             const double item2 = .6;
-            const decimal Ratio = 0.5m;
+            const decimal ratio = 0.5m;
             List<double> blahblah = new List<double> { item1, item2 };
-            var result = blahblah.Partition(Ratio);
+            var result = blahblah.Partition(ratio);
             Assert.Equal(result[0].Count, 1);
             Assert.Equal(result[1].Count, 1);
             Assert.Equal(result[0].First(), item1);
@@ -758,10 +756,10 @@ namespace Extensions.Standard.Test
             const double item1 = .5;
             const double item2 = .6;
             const double item3 = .7;
-            const decimal Ratio = 2.0m / 3.0m;
+            const decimal ratio = 2.0m / 3.0m;
 
             List<double> blahblah = new List<double> { item1, item2, item3 };
-            var result = blahblah.Partition(Ratio);
+            var result = blahblah.Partition(ratio);
             Assert.Equal(result[0].Count, 2);
             Assert.Equal(result[1].Count, 1);
             Assert.Equal(result[0][0], item1);
