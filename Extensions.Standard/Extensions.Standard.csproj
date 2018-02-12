@@ -14,8 +14,8 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
-    <Version>2.0.0</Version>
-    <PackageReleaseNotes>Upgraded to .NET Core 2.0</PackageReleaseNotes>
+    <Version>2.1.0</Version>
+    <PackageReleaseNotes>Accept IEnumerable&lt;T&gt; in Partition and MaxIndex insted of IList&lt;T&gt;</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
