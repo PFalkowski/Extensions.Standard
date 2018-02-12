@@ -228,20 +228,21 @@ namespace Extensions.Standard
             }
         }
 
-        public static List<List<T>> Partition<T>(this IList<T> input, decimal firstPartitionRatio)
+        public static List<List<T>> Partition<T>(this IEnumerable<T> input, decimal firstPartitionRatio)
         {
             if (firstPartitionRatio <= 0 || firstPartitionRatio > 1.0m)
                 throw new ArgumentOutOfRangeException(nameof(firstPartitionRatio));
 
             var partitionDefinition = new PartitioningDefinition(new List<decimal> { firstPartitionRatio, 1m - firstPartitionRatio });
 
-            return input.Partition(partitionDefinition);
+            return input.ToList().Partition(partitionDefinition);
         }
 
-        public static List<List<T>> Partition<T>(this IList<T> input, PartitioningDefinition partitioningDefinition)
+        public static List<List<T>> Partition<T>(this IEnumerable<T> input, PartitioningDefinition partitioningDefinition)
         {
             if (input == null) throw new ArgumentNullException(nameof(input));
-            if (input.Count == 0) throw new ArgumentException(nameof(input));
+            var inputAsList = input.ToList();
+            if (inputAsList.Count == 0) throw new ArgumentException(nameof(input));
             if (partitioningDefinition == null) throw new ArgumentNullException(nameof(partitioningDefinition));
             if (!partitioningDefinition.IsValid()) throw new ArgumentException(nameof(partitioningDefinition));
 
@@ -250,17 +251,17 @@ namespace Extensions.Standard
 
             foreach (var proportion in partitioningDefinition.PartitionsDefinitions)
             {
-                var endingElementIndex = (int)(i + proportion * input.Count);
+                var endingElementIndex = (int)(i + proportion * inputAsList.Count);
                 var tempList = new List<T>(endingElementIndex - i);
                 for (; i < endingElementIndex; ++i)
                 {
-                    tempList.Add(input[i]);
+                    tempList.Add(inputAsList[i]);
                 }
                 result.Add(tempList);
             }
-            for (; i < input.Count; ++i)
+            for (; i < inputAsList.Count; ++i)
             {
-                result.Last().Add(input[i]);
+                result.Last().Add(inputAsList[i]);
             }
             return result;
         }
@@ -293,15 +294,16 @@ namespace Extensions.Standard
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static int MaxIndex(this IList<double> input)
+        public static int MaxIndex(this IEnumerable<double> input)
         {
+            var inputAsList = input.ToList();
             var index = 0;
-            var value = input[0];
-            for (var i = 0; i < input.Count; ++i)
+            var value = inputAsList[0];
+            for (var i = 0; i < inputAsList.Count; ++i)
             {
-                if (input[i] > value)
+                if (inputAsList[i] > value)
                 {
-                    value = input[i];
+                    value = inputAsList[i];
                     index = i;
                 }
             }
