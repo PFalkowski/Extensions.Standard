@@ -112,8 +112,8 @@ namespace Extensions.Standard.Test
 
             double[] tested2 = null;
 
-            Assert.True(tested1.SequenceEquals((double[]) null, 0.1));
-            Assert.True(tested2.SequenceEquals((double[]) null, 0.1));
+            Assert.True(tested1.SequenceEquals((double[])null, 0.1));
+            Assert.True(tested2.SequenceEquals((double[])null, 0.1));
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace Extensions.Standard.Test
             var tested2 = new[] { 1.0, 1.0, 1.0 };
 
             Assert.False(tested1.SequenceEquals(tested2, 0.1));
-            Assert.False(tested2.SequenceEquals((double[]) null, 0.1));
+            Assert.False(tested2.SequenceEquals((double[])null, 0.1));
         }
 
         [Fact]
@@ -390,7 +390,7 @@ namespace Extensions.Standard.Test
         {
             var sequence1 = new[] { -1.0, 1.0, -123.9, 123, -99999.7 };
 
-            Assert.Throws<ArgumentNullException>(() => sequence1.InnerProduct((List<double>) null, 0.0, (result, x, y) => result + x * y));
+            Assert.Throws<ArgumentNullException>(() => sequence1.InnerProduct((List<double>)null, 0.0, (result, x, y) => result + x * y));
         }
 
         [Fact]
@@ -707,7 +707,7 @@ namespace Extensions.Standard.Test
         [Fact]
         public void PartitionTestException1()
         {
-            Assert.Throws<ArgumentNullException>(() => ((List<double>) null).Partition(.5m));
+            Assert.Throws<ArgumentNullException>(() => ((List<double>)null).Partition(.5m));
         }
 
         [Fact]
@@ -845,10 +845,22 @@ namespace Extensions.Standard.Test
         {
             var definition = new PartitioningDefinition(new List<decimal> { 0.5m, 0.5m });
 
-            var input = new List<double> { 1, 2, 3, 4 };
+            var input = new List<int> { 1, 2, 3, 4 };
             var result = input.Partition(definition);
+            Assert.Equal(input[0], result[0][0]);
+            Assert.Equal(input[1], result[0][1]);
+            Assert.Equal(input[2], result[1][0]);
+            Assert.Equal(input[3], result[1][1]);
 
-            // TODO - mock definition and test in separation
+
+            definition = new PartitioningDefinition(new List<decimal> { 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m, 0.1m });
+
+            input = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            result = input.Partition(definition);
+            for (var i = 0; i < input.Count; ++i)
+            {
+                Assert.Equal(result[i][0], input[i]);
+            }
         }
 
         #region Unit test related
