@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Lightweight extensions methods (and constants) for common programming tasks, like:
+    <Description>Lightweight extensions methods (and constants) for common programming tasks:
 
-Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, InnerProduct, IsPrime, ManhattanDistance, EuclideanDistance, InClosedRange, MeanSquaredError, EqualsWithTolerance, HsVtoArgb, Scale, Fit and many more. Also a useful interfces IValueEquatable and IValidatable are introduced. Members are unit tested and the code is openly available at github to check/contribute:  https://github.com/PFalkowski/Extensions.Standard </Description>
+Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, InnerProduct, IsPrime, ManhattanDistance, EuclideanDistance, InClosedRange, MeanSquaredError, EqualsWithTolerance, HsVtoArgb, Scale, Fit and many more.</Description>
     <Company>Piotr Falkowski</Company>
     <Authors>Piotr Falkowski</Authors>
-    <Copyright>Piotr Falkowski © 2017</Copyright>
+    <Copyright>Piotr Falkowski © 2018</Copyright>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/PFalkowski/Extensions.Standard</PackageProjectUrl>
@@ -15,7 +15,7 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
     <Version>3.0.0</Version>
-    <PackageReleaseNotes>move interfaces to new Nuget StandardInterfaces</PackageReleaseNotes>
+    <PackageReleaseNotes>fix description</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
