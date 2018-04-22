@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Extensions.Standard
 {
-    public static partial class Utilities
+    public static class Utilities
     {
         #region Primes
 
@@ -513,17 +513,17 @@ namespace Extensions.Standard
             var converted = Convert.ToUInt64(milliseconds);
             var stb = new StringBuilder();
 
-            if (converted >= 86400000)
+            if (converted >= Constants.MillisecondsInDay)
             {
-                stb.Append(converted / 86400000);
-                stb.Append(converted < 2 * 86400000 ? " day, " : " days, ");
-                converted %= 86400000;
+                stb.Append(converted / Constants.MillisecondsInDay);
+                stb.Append(converted < 2 * Constants.MillisecondsInDay ? " day, " : " days, ");
+                converted %= Constants.MillisecondsInDay;
             }
-            if (converted >= 3600000)
+            if (converted >= Constants.MillisecondsInHour)
             {
-                stb.Append(converted / 3600000);
+                stb.Append(converted / Constants.MillisecondsInHour);
                 stb.Append(" h, ");
-                converted %= 3600000;
+                converted %= Constants.MillisecondsInHour;
             }
             if (converted >= Constants.MillisecondsInMinute)
             {
@@ -553,23 +553,23 @@ namespace Extensions.Standard
         {
             var stb = new StringBuilder();
 
-            if (milliseconds >= 86400000)
+            if (milliseconds >= Constants.MillisecondsInDay)
             {
-                stb.Append(milliseconds / 86400000);
-                if (milliseconds < 2 * 86400000)
+                stb.Append(milliseconds / Constants.MillisecondsInDay);
+                if (milliseconds < 2 * Constants.MillisecondsInDay)
                     stb.Append(" day, ");
                 else
                     stb.Append(" days, ");
-                milliseconds %= 86400000;
+                milliseconds %= Constants.MillisecondsInDay;
             }
-            if (milliseconds >= 3600000)
+            if (milliseconds >= Constants.MillisecondsInHour)
             {
-                stb.Append(milliseconds / 3600000);
-                if (milliseconds < 2 * 3600000)
+                stb.Append(milliseconds / Constants.MillisecondsInHour);
+                if (milliseconds < 2 * Constants.MillisecondsInHour)
                     stb.Append(" hour, ");
                 else
                     stb.Append(" hours, ");
-                milliseconds %= 3600000;
+                milliseconds %= Constants.MillisecondsInHour;
             }
             if (milliseconds >= Constants.MillisecondsInMinute)
             {

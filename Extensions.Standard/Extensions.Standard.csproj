@@ -14,8 +14,8 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
-    <Version>3.0.0</Version>
-    <PackageReleaseNotes>fix description</PackageReleaseNotes>
+    <Version>4.0.0</Version>
+    <PackageReleaseNotes>Add time constants. Prefere specific types in functions returns. Change all lazily returned objects to eagerly.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
