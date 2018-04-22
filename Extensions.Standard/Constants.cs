@@ -98,5 +98,23 @@
         public const int MillisecondsInHour = MillisecondsInMinute * 60;
         public const int MillisecondsInDay = MillisecondsInHour * 24;
 
+        public const string KilobyteSuffix = "kB";
+        public const string MegabyteSuffix = "MB";
+        public const string GigabyteSuffix = "GB";
+        public const string TerabyteSuffix = "TB";
+        public const string PetabyteSuffix = "PB";
+        public const string ExabyteSuffix = "EB";
+        public const string ZettabyteSuffix = "ZB";
+        public const string YottabyteSuffix = "YB";
+
+        public const string KibibyteSuffix = "KiB";
+        public const string MebibyteSuffix = "MiB";
+        public const string GibibyteSuffix = "GiB";
+        public const string TebibyteSuffix = "TiB";
+        public const string PebibyteSuffix = "PiB";
+        public const string ExbibyteSuffix = "EiB";
+        public const string ZebibyteSuffix = "ZiB";
+        public const string YobibyteSuffix = "YiB";
+
     }
 }

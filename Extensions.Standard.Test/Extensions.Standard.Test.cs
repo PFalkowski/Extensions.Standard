@@ -509,17 +509,17 @@ namespace Extensions.Standard.Test
         public void AsMemoryTestkB()
         {
             var testedAmount = 1024;
-            Assert.Equal(string.Concat(1.ToString(CultureInfo.InvariantCulture), " KB"), testedAmount.AsMemory());
+            Assert.Equal(string.Concat(1.ToString(CultureInfo.InvariantCulture), $" {Constants.KibibyteSuffix}"), testedAmount.AsMemory());
             testedAmount = 1024 + 512;
-            Assert.Equal(string.Concat(1.5.ToString(CultureInfo.InvariantCulture), " KB"), testedAmount.AsMemory());
+            Assert.Equal(string.Concat(1.5.ToString(CultureInfo.InvariantCulture), $" {Constants.KibibyteSuffix}"), testedAmount.AsMemory());
             testedAmount = 1024 * 1024;
-            Assert.Equal(string.Concat(1.ToString(CultureInfo.InvariantCulture), " MB"), testedAmount.AsMemory());
+            Assert.Equal(string.Concat(1.ToString(CultureInfo.InvariantCulture), $" {Constants.MebibyteSuffix}"), testedAmount.AsMemory());
             testedAmount = 1024 * (1024 + 512);
-            Assert.Equal(string.Concat(1.5.ToString(CultureInfo.InvariantCulture), " MB"), testedAmount.AsMemory());
+            Assert.Equal(string.Concat(1.5.ToString(CultureInfo.InvariantCulture), $" {Constants.MebibyteSuffix}"), testedAmount.AsMemory());
             testedAmount = 1024 * 1024 * 1024;
-            Assert.Equal(string.Concat(1.ToString(CultureInfo.InvariantCulture), " GB"), testedAmount.AsMemory());
+            Assert.Equal(string.Concat(1.ToString(CultureInfo.InvariantCulture), $" {Constants.GibibyteSuffix}"), testedAmount.AsMemory());
             testedAmount = 1024 * 1024 * (1024 + 512);
-            Assert.Equal(string.Concat(1.5.ToString(CultureInfo.InvariantCulture), " GB"), testedAmount.AsMemory());
+            Assert.Equal(string.Concat(1.5.ToString(CultureInfo.InvariantCulture), $" {Constants.GibibyteSuffix}"), testedAmount.AsMemory());
         }
 
         [Fact]
