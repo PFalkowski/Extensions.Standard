@@ -483,32 +483,14 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
-        public void AsMemoryTestbytes()
+        public void AsMemoryTestkB()
         {
             var testedAmount = 1;
             var tested = testedAmount.AsMemory();
-            Assert.StartsWith("1 ", tested);
             Assert.Equal("1 byte", tested);
-        }
-
-        [Fact]
-        public void AsMemoryTestbytes2()
-        {
-            var testedAmount = 1023;
-            Assert.Equal(string.Concat(testedAmount, " bytes"), testedAmount.AsMemory());
-        }
-
-        [Fact]
-        public void AsMemoryTestbytes3()
-        {
-            var testedAmount = 1023;
-            Assert.Equal(string.Concat(testedAmount, " bytes"), testedAmount.AsMemory());
-        }
-
-        [Fact]
-        public void AsMemoryTestkB()
-        {
-            var testedAmount = 1024;
+            testedAmount = 1023;
+            Assert.Equal(string.Concat(1023, " bytes"), testedAmount.AsMemory());
+            testedAmount = 1024;
             Assert.Equal(string.Concat(1.ToString(CultureInfo.InvariantCulture), $" {Constants.KibibyteSuffix}"), testedAmount.AsMemory());
             testedAmount = 1024 + 512;
             Assert.Equal(string.Concat(1.5.ToString(CultureInfo.InvariantCulture), $" {Constants.KibibyteSuffix}"), testedAmount.AsMemory());
@@ -608,7 +590,7 @@ namespace Extensions.Standard.Test
             second = new double[] { 10, 20 };
             Assert.Equal(Utilities.Interpolate(first, second, anyValue), anyValue * 2);
         }
-        
+
         [Fact]
         public void Interpolation2()
         {
