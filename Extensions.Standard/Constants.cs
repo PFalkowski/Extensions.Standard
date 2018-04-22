@@ -91,5 +91,12 @@
         public const ulong BitsInPebibyte = BitsInByte * PiB;
 
         public const ulong BitsInExbibyte = BitsInByte * EiB;
+
+
+        public const int MillisecondsInSecond = 1000;
+        public const int MillisecondsInMinute = MillisecondsInSecond * 60;
+        public const int MillisecondsInHour = MillisecondsInMinute * 60;
+        public const int MillisecondsInDay = MillisecondsInHour * 24;
+
     }
 }

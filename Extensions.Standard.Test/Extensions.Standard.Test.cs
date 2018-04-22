@@ -591,6 +591,25 @@ namespace Extensions.Standard.Test
             second = new double[] { 10, 20 };
             Assert.Equal(Utilities.Interpolate(first, second, anyValue), anyValue * 2);
         }
+        
+        [Fact]
+        public void Interpolation2()
+        {
+            var anyValue = 123.45;
+            var first = new double[] { 0, 0 };
+            var second = new double[] { 10, 10 };
+            Assert.Equal(Utilities.Interpolate(first, second, anyValue), anyValue);
+
+
+            first = new double[] { 0, 0 };
+            second = new double[] { 20, 10 };
+            Assert.Equal(Utilities.Interpolate(first, second, anyValue), anyValue / 2);
+
+
+            first = new double[] { 0, 0 };
+            second = new double[] { 10, 20 };
+            Assert.Equal(Utilities.Interpolate(first, second, anyValue), anyValue * 2);
+        }
 
         [Fact]
         public void Area1()

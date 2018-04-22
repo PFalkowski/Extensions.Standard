@@ -61,7 +61,6 @@ namespace Extensions.Standard
         {
             return p1[1] + ((x - p1[0]) * p2[1] - (x - p1[0]) * p1[1]) / (p2[0] - p1[0]);
         }
-
         /// <summary>
         ///     Calculate area of a polygon defined by points in <paramref name="polygon"/>.
         /// </summary>
@@ -172,19 +171,20 @@ namespace Extensions.Standard
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static IList<double> Softmax(this IList<double> input)
+        public static IList<double> Softmax(this IEnumerable<double> input)
         {
-            var max = input.Max();
+            var inputAsArray = input as double[] ?? input.ToArray();
+            var max = inputAsArray.Max();
 
-            var result = new double[input.Count];
-            double sum = 0.0;
-            for (var i = 0; i < input.Count; ++i)
+            var result = new double[inputAsArray.Length];
+            var sum = 0.0;
+            for (var i = 0; i < inputAsArray.Length; ++i)
             {
-                result[i] = Math.Exp(input[i] - max);
+                result[i] = Math.Exp(inputAsArray[i] - max);
                 sum += result[i];
             }
 
-            for (var i = 0; i < input.Count; ++i)
+            for (var i = 0; i < inputAsArray.Length; ++i)
                 result[i] /= sum;
 
             return result;
@@ -525,13 +525,13 @@ namespace Extensions.Standard
                 stb.Append(" h, ");
                 converted %= 3600000;
             }
-            if (converted >= 60000)
+            if (converted >= Constants.MillisecondsInMinute)
             {
-                stb.Append(converted / 60000);
+                stb.Append(converted / Constants.MillisecondsInMinute);
                 stb.Append(" min, ");
-                converted %= 60000;
+                converted %= Constants.MillisecondsInMinute;
             }
-            if (converted >= 1000)
+            if (converted >= Constants.MillisecondsInSecond)
             {
                 stb.Append(Math.Round(converted / 1000.0, 1).ToString(CultureInfo.InvariantCulture));
                 stb.Append(" s");
@@ -549,7 +549,7 @@ namespace Extensions.Standard
         /// </summary>
         /// <param name="milliseconds">miliseconds</param>
         /// <returns></returns>
-        internal static string AsTimeL(this long milliseconds)
+        internal static string AsTimeVerbose(this long milliseconds)
         {
             var stb = new StringBuilder();
 
@@ -571,14 +571,14 @@ namespace Extensions.Standard
                     stb.Append(" hours, ");
                 milliseconds %= 3600000;
             }
-            if (milliseconds >= 60000)
+            if (milliseconds >= Constants.MillisecondsInMinute)
             {
-                stb.Append(milliseconds / 60000);
-                if (milliseconds < 2 * 60000)
+                stb.Append(milliseconds / Constants.MillisecondsInMinute);
+                if (milliseconds < 2 * Constants.MillisecondsInMinute)
                     stb.Append(" minute, ");
                 else
                     stb.Append(" minutes, ");
-                milliseconds %= 60000;
+                milliseconds %= Constants.MillisecondsInMinute;
             }
             if (milliseconds >= 1000)
             {
