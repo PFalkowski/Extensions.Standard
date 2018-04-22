@@ -381,7 +381,7 @@ namespace Extensions.Standard
         #region Suffixes
 
         /// <summary>
-        ///     Provide number of bytes and receive user friendly string. This method uses binary orders of magnitude of data (KB = kibibyte = 1024 bytes), for decimal use AsMemoryDecimal.
+        ///     Provide number of bytes and receive user friendly string. This method uses binary orders of magnitude of data (KiB = kibibyte = 1024 bytes), for decimal use AsMemoryDecimal.
         ///     Note, that for kibibyte, mebibyte and gibibyte JEDEC convention is used, i.e. KB, MB and GB respectively. This is to hold on to convention used by Windows OS, which reports memory usage in JEDEC standard. 
         /// </summary>
         /// <param name="bytes"></param>
@@ -446,25 +446,25 @@ namespace Extensions.Standard
             }
             if (bytesConverted < Constants.Mega)
             {
-                return $"{Math.Round(bytesConverted / Constants.Kilo, decimals).ToString(numberFormat):n} {Constants.KibibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Kilo, decimals).ToString(numberFormat):n} {Constants.KilobyteSuffix}";
             }
             if (bytesConverted < Constants.Giga)
             {
-                return $"{Math.Round(bytesConverted / Constants.Mega, decimals).ToString(numberFormat):n} {Constants.MebibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Mega, decimals).ToString(numberFormat):n} {Constants.MegabyteSuffix}";
             }
             if (bytesConverted < Constants.Tera)
             {
-                return $"{Math.Round(bytesConverted / Constants.Giga, decimals).ToString(numberFormat):n} {Constants.GibibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Giga, decimals).ToString(numberFormat):n} {Constants.GigabyteSuffix}";
             }
             if (bytesConverted < Constants.Penta)
             {
-                return $"{Math.Round(bytesConverted / Constants.Tera, decimals).ToString(numberFormat):n} {Constants.TebibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Tera, decimals).ToString(numberFormat):n} {Constants.TerabyteSuffix}";
             }
             if (bytesConverted < Constants.Exa)
             {
-                return $"{Math.Round(bytesConverted / Constants.Penta, decimals).ToString(numberFormat):n} {Constants.PebibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Penta, decimals).ToString(numberFormat):n} {Constants.PetabyteSuffix}";
             }
-            return $"{Math.Round(bytesConverted / Constants.Exa, decimals).ToString(numberFormat):n} {Constants.ExbibyteSuffix}";
+            return $"{Math.Round(bytesConverted / Constants.Exa, decimals).ToString(numberFormat):n} {Constants.ExabyteSuffix}";
         }
 
         /// <summary>

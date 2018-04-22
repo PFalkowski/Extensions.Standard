@@ -523,6 +523,23 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
+        public void AsMemoryDecimalTestkB()
+        {
+            var testedAmount = 1024;
+            Assert.Equal(string.Concat(1.02.ToString(CultureInfo.InvariantCulture), $" {Constants.KilobyteSuffix}"), testedAmount.AsMemoryDecimal());
+            testedAmount = 1024 + 512;
+            Assert.Equal(string.Concat(1.54.ToString(CultureInfo.InvariantCulture), $" {Constants.KilobyteSuffix}"), testedAmount.AsMemoryDecimal());
+            testedAmount = 1024 * 1024;
+            Assert.Equal(string.Concat(1.05.ToString(CultureInfo.InvariantCulture), $" {Constants.MegabyteSuffix}"), testedAmount.AsMemoryDecimal());
+            testedAmount = 1024 * (1024 + 512);
+            Assert.Equal(string.Concat(1.57.ToString(CultureInfo.InvariantCulture), $" {Constants.MegabyteSuffix}"), testedAmount.AsMemoryDecimal());
+            testedAmount = 1024 * 1024 * 1024;
+            Assert.Equal(string.Concat(1.07.ToString(CultureInfo.InvariantCulture), $" {Constants.GigabyteSuffix}"), testedAmount.AsMemoryDecimal());
+            testedAmount = 1024 * 1024 * (1024 + 512);
+            Assert.Equal(string.Concat(1.61.ToString(CultureInfo.InvariantCulture), $" {Constants.GigabyteSuffix}"), testedAmount.AsMemoryDecimal());
+        }
+
+        [Fact]
         public void AsTime2()
         {
             var testedAmount = 83469231;
