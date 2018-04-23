@@ -288,7 +288,7 @@ namespace Extensions.Standard
             }
             return true;
         }
-        
+
         /// <summary>
         /// Largest value index. If the sequence contains more than one, first occurence's index will be returned.
         /// </summary>
@@ -423,7 +423,6 @@ namespace Extensions.Standard
             }
             return $"{Math.Round(bytesConverted / Constants.EiB, decimals).ToString(numberFormat):n} {Constants.ExbibyteSuffix}";
         }
-
         /// <summary>
         ///     Provide number of bytes and receive user friendly string. This method uses decimal orders of magnitude of data (KB = kilobyte = 1000 bytes), for binary use AsMemory. 
         /// </summary>
@@ -456,13 +455,13 @@ namespace Extensions.Standard
             {
                 return $"{Math.Round(bytesConverted / Constants.Giga, decimals).ToString(numberFormat):n} {Constants.GigabyteSuffix}";
             }
-            if (bytesConverted < Constants.Penta)
+            if (bytesConverted < Constants.Peta)
             {
                 return $"{Math.Round(bytesConverted / Constants.Tera, decimals).ToString(numberFormat):n} {Constants.TerabyteSuffix}";
             }
             if (bytesConverted < Constants.Exa)
             {
-                return $"{Math.Round(bytesConverted / Constants.Penta, decimals).ToString(numberFormat):n} {Constants.PetabyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Peta, decimals).ToString(numberFormat):n} {Constants.PetabyteSuffix}";
             }
             return $"{Math.Round(bytesConverted / Constants.Exa, decimals).ToString(numberFormat):n} {Constants.ExabyteSuffix}";
         }
@@ -605,7 +604,7 @@ namespace Extensions.Standard
         #endregion
 
         #region Scaling
-        
+
         private static double ScaleSafe(this double value, double scaleMin, double scaleMax)
         {
             return scaleMin + value * scaleMax - value * scaleMin;

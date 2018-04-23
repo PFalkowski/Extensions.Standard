@@ -1,8 +1,11 @@
-﻿namespace Extensions.Standard
+﻿using System;
+using System.Collections.Generic;
+
+namespace Extensions.Standard
 {
     public static class Constants
     {
-        public const byte BitsInByte = sizeof(byte);
+        public const byte BitsInByte = 8;
 
         /// <summary>
         ///     1000
@@ -27,12 +30,22 @@
         /// <summary>
         ///     1000000000000000
         /// </summary>
-        public const ulong Penta = Tera * 1000;
+        public const ulong Peta = Tera * 1000;
 
         /// <summary>
         ///     1000000000000000000
         /// </summary>
-        public const ulong Exa = Penta * 1000;
+        public const ulong Exa = Peta * 1000;
+
+        /// <summary>
+        ///     1000000000000000000000
+        /// </summary>
+        public const decimal Zetta = (decimal)Exa * 1000;
+
+        /// <summary>
+        ///     1000000000000000000000000
+        /// </summary>
+        public const decimal Yotta = (decimal)Zetta * 1000;
 
 
 
@@ -65,7 +78,17 @@
         ///     1152921504606846976
         /// </summary>
         public const ulong EiB = PiB * 1024;
-        
+
+        /// <summary>
+        ///     1180591620717411303424
+        /// </summary>
+        public const decimal ZiB = (decimal)EiB * 1024;
+
+        /// <summary>
+        ///     1180591620717411303424
+        /// </summary>
+        public const decimal YiB = ZiB * 1024;
+
 
         public const ulong BitsInKilobyte = BitsInByte * Kilo;
 
@@ -75,9 +98,13 @@
 
         public const ulong BitsInTerabyte = BitsInByte * Tera;
 
-        public const ulong BitsInPentabyte = BitsInByte * Penta;
+        public const ulong BitsInPetabyte = BitsInByte * Peta;
 
         public const ulong BitsInExabyte = BitsInByte * Exa;
+
+        public const decimal BitsInZettabyte = BitsInByte * Zetta;
+
+        public const decimal BitsInYottabyte = BitsInByte * Yotta;
 
 
         public const ulong BitsInKibibyte = BitsInByte * KiB;
@@ -91,6 +118,10 @@
         public const ulong BitsInPebibyte = BitsInByte * PiB;
 
         public const ulong BitsInExbibyte = BitsInByte * EiB;
+
+        public const decimal BitsInZebibyte = BitsInByte * ZiB;
+
+        public const decimal BitsInYobibyte = BitsInByte * YiB;
 
 
         public const int MillisecondsInSecond = 1000;
@@ -115,6 +146,30 @@
         public const string ExbibyteSuffix = "EiB";
         public const string ZebibyteSuffix = "ZiB";
         public const string YobibyteSuffix = "YiB";
+
+        public static readonly Tuple<string, decimal>[] BinaryOrders = new Tuple<string, decimal>[]
+        {
+            new Tuple<string, decimal>("byte", 1),
+            new Tuple<string, decimal>(KibibyteSuffix, KiB),
+            new Tuple<string, decimal>(MebibyteSuffix, MiB),
+            new Tuple<string, decimal>(GibibyteSuffix, GiB),
+            new Tuple<string, decimal>(TebibyteSuffix, TiB),
+            new Tuple<string, decimal>(PebibyteSuffix, PiB),
+            new Tuple<string, decimal>(ExbibyteSuffix, EiB),
+            new Tuple<string, decimal>(ZebibyteSuffix, ZiB)
+        };
+        public static readonly Tuple<string, decimal>[] DecimalOrders = new Tuple<string, decimal>[]
+        {
+            new Tuple<string, decimal>("byte", 1),
+            new Tuple<string, decimal>(KilobyteSuffix, Kilo),
+            new Tuple<string, decimal>(MegabyteSuffix, Mega),
+            new Tuple<string, decimal>(GigabyteSuffix, Giga),
+            new Tuple<string, decimal>(TerabyteSuffix, Tera),
+            new Tuple<string, decimal>(PetabyteSuffix, Peta),
+            new Tuple<string, decimal>(ExabyteSuffix, Exa),
+            new Tuple<string, decimal>(ZettabyteSuffix, Zetta),
+            new Tuple<string, decimal>(YottabyteSuffix, Yotta)
+        };
 
     }
 }
