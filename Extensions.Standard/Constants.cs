@@ -156,7 +156,8 @@ namespace Extensions.Standard
             new Tuple<string, decimal>(TebibyteSuffix, TiB),
             new Tuple<string, decimal>(PebibyteSuffix, PiB),
             new Tuple<string, decimal>(ExbibyteSuffix, EiB),
-            new Tuple<string, decimal>(ZebibyteSuffix, ZiB)
+            new Tuple<string, decimal>(ZebibyteSuffix, ZiB),
+            new Tuple<string, decimal>(YobibyteSuffix, YiB)
         };
         public static readonly Tuple<string, decimal>[] DecimalOrders = new Tuple<string, decimal>[]
         {

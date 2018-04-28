@@ -399,29 +399,33 @@ namespace Extensions.Standard
 
             if (bytesConverted < Constants.KiB)
             {
-                return $"{bytesConverted.ToString(numberFormat):n} {"byte".PluralizeWhenNeeded(bytesConverted)}";
+                return $"{bytesConverted.ToString(numberFormat)} {"byte".PluralizeWhenNeeded(bytesConverted)}";
             }
             if (bytesConverted < Constants.MiB)
             {
-                return $"{Math.Round(bytesConverted / Constants.KiB, decimals).ToString(numberFormat):n} {Constants.KibibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.KiB, decimals).ToString(numberFormat)} {Constants.KibibyteSuffix}";
             }
             if (bytesConverted < Constants.GiB)
             {
-                return $"{Math.Round(bytesConverted / Constants.MiB, decimals).ToString(numberFormat):n} {Constants.MebibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.MiB, decimals).ToString(numberFormat)} {Constants.MebibyteSuffix}";
             }
             if (bytesConverted < Constants.TiB)
             {
-                return $"{Math.Round(bytesConverted / Constants.GiB, decimals).ToString(numberFormat):n} {Constants.GibibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.GiB, decimals).ToString(numberFormat)} {Constants.GibibyteSuffix}";
             }
             if (bytesConverted < Constants.PiB)
             {
-                return $"{Math.Round(bytesConverted / Constants.TiB, decimals).ToString(numberFormat):n} {Constants.TebibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.TiB, decimals).ToString(numberFormat)} {Constants.TebibyteSuffix}";
             }
             if (bytesConverted < Constants.EiB)
             {
-                return $"{Math.Round(bytesConverted / Constants.PiB, decimals).ToString(numberFormat):n} {Constants.PebibyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.PiB, decimals).ToString(numberFormat)} {Constants.PebibyteSuffix}";
             }
-            return $"{Math.Round(bytesConverted / Constants.EiB, decimals).ToString(numberFormat):n} {Constants.ExbibyteSuffix}";
+            if (bytesConverted < Constants.ZiB)
+            {
+                return $"{Math.Round(bytesConverted / Constants.YiB, decimals).ToString(numberFormat)} {Constants.ExbibyteSuffix}";
+            }
+            return $"{Math.Round(bytesConverted / Constants.ZiB, decimals).ToString(numberFormat)} {Constants.YobibyteSuffix}";
         }
         /// <summary>
         ///     Provide number of bytes and receive user friendly string. This method uses decimal orders of magnitude of data (KB = kilobyte = 1000 bytes), for binary use AsMemory. 
@@ -441,29 +445,33 @@ namespace Extensions.Standard
 
             if (bytesConverted < Constants.Kilo)
             {
-                return $"{bytesConverted.ToString(numberFormat):n} {"byte".PluralizeWhenNeeded(bytesConverted)}";
+                return $"{bytesConverted.ToString(numberFormat)} {"byte".PluralizeWhenNeeded(bytesConverted)}";
             }
             if (bytesConverted < Constants.Mega)
             {
-                return $"{Math.Round(bytesConverted / Constants.Kilo, decimals).ToString(numberFormat):n} {Constants.KilobyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Kilo, decimals).ToString(numberFormat)} {Constants.KilobyteSuffix}";
             }
             if (bytesConverted < Constants.Giga)
             {
-                return $"{Math.Round(bytesConverted / Constants.Mega, decimals).ToString(numberFormat):n} {Constants.MegabyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Mega, decimals).ToString(numberFormat)} {Constants.MegabyteSuffix}";
             }
             if (bytesConverted < Constants.Tera)
             {
-                return $"{Math.Round(bytesConverted / Constants.Giga, decimals).ToString(numberFormat):n} {Constants.GigabyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Giga, decimals).ToString(numberFormat)} {Constants.GigabyteSuffix}";
             }
             if (bytesConverted < Constants.Peta)
             {
-                return $"{Math.Round(bytesConverted / Constants.Tera, decimals).ToString(numberFormat):n} {Constants.TerabyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Tera, decimals).ToString(numberFormat)} {Constants.TerabyteSuffix}";
             }
             if (bytesConverted < Constants.Exa)
             {
-                return $"{Math.Round(bytesConverted / Constants.Peta, decimals).ToString(numberFormat):n} {Constants.PetabyteSuffix}";
+                return $"{Math.Round(bytesConverted / Constants.Peta, decimals).ToString(numberFormat)} {Constants.PetabyteSuffix}";
             }
-            return $"{Math.Round(bytesConverted / Constants.Exa, decimals).ToString(numberFormat):n} {Constants.ExabyteSuffix}";
+            if (bytesConverted < Constants.Zetta)
+            {
+                return $"{Math.Round(bytesConverted / Constants.Exa, decimals).ToString(numberFormat)} {Constants.ZettabyteSuffix}";
+            }
+            return $"{Math.Round(bytesConverted / Constants.Zetta, decimals).ToString(numberFormat)} {Constants.YobibyteSuffix}";
         }
 
         /// <summary>

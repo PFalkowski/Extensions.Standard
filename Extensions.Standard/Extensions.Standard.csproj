@@ -15,7 +15,7 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
     <Version>3.0.1</Version>
-    <PackageReleaseNotes>Fix major bug in Constants. Unit tests</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix major bug in Constants</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
