@@ -1,3 +1,8 @@
+# Extensions.Standard
+
+[![NuGet version (Extensions.Standard)](https://img.shields.io/nuget/v/Extensions.Standard.svg)](https://www.nuget.org/packages/Extensions.Standard/)
+[![Licence (Extensions.Serialization)](https://img.shields.io/github/license/mashape/apistatus.svg)](https://choosealicense.com/licenses/mit/)
+
 Lightweight extensions methods (and constants) for common programming tasks, like:
 
 - Suffixes (AsMemory, AsTime)
