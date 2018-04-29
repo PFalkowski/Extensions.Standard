@@ -23,4 +23,4 @@ Lightweight extensions methods (and constants) for common programming tasks, lik
 
 and many more.
 
-Extensions for System.Random (NextBool, NextChar, NextString etc.) moved to [StrongRandom](https://github.com/PFalkowski/StrongRandom)
+Extensions for ```System.Random``` (NextBool, NextChar, NextString etc.) moved to [StrongRandom](https://github.com/PFalkowski/StrongRandom)
