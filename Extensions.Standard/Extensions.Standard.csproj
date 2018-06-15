@@ -14,7 +14,7 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
-    <Version>3.0.1</Version>
+    <Version>3.1.0</Version>
     <PackageReleaseNotes>Fix major bug in Constants</PackageReleaseNotes>
   </PropertyGroup>
 
@@ -23,7 +23,7 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StandardInterfaces" Version="1.0.0" />
+    <PackageReference Include="StandardInterfaces" Version="1.2.0" />
   </ItemGroup>
 
 </Project>

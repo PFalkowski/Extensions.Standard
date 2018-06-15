@@ -636,32 +636,48 @@ namespace Extensions.Standard
             return m * value + c;
         }
 
+        public static (double Min, double Max) FindMinMaxInOn(this IEnumerable<double> data)
+        {
+            var dataMin = double.MaxValue;
+            var dataMax = double.MinValue;
+            foreach (var item in data)
+            {
+                if (item < dataMin) dataMin = item;
+                if (item > dataMax) dataMax = item;
+            }
+            return (Min: dataMin, Max: dataMax);
+        }
+
         public static IEnumerable<double> Scale(this IEnumerable<double> data, double scaleMin = 0.0D,
             double scaleMax = 1.0D)
         {
-            var enumerable = data as double[] ?? data.ToArray();
-            var dataMin = enumerable.Min();
-            var dataMax = enumerable.Max();
-            var m = (scaleMax - scaleMin) / (dataMax - dataMin);
-            var c = scaleMin - dataMin * m;
-            foreach (var item in enumerable)
+            var enumerated = data as double[] ?? data.ToArray();
+            var (Min, Max) = data.FindMinMaxInOn();
+            var m = (scaleMax - scaleMin) / (Max - Min);
+            var c = scaleMin - Min * m;
+            var result = new double[enumerated.Length];
+
+            for (int i = 0; i < enumerated.Length; ++i)
             {
-                yield return m * item + c;
+                result[i] = m * enumerated[i] + c;
             }
+            return result;
         }
 
         public static IEnumerable<double> Scale<T>(this IEnumerable<T> data, double scaleMin = 0.0D,
             double scaleMax = 1.0D) where T : IConvertible
         {
-            var enumerable = data as T[] ?? data.ToArray();
-            var dataMin = Convert.ToDouble(enumerable.Min());
-            var dataMax = Convert.ToDouble(enumerable.Max());
-            var m = (scaleMax - scaleMin) / (dataMax - dataMin);
-            var c = scaleMin - dataMin * m;
-            foreach (var item in enumerable)
+            var enumerated = data as T[] ?? data.ToArray();
+            var (Min, Max) = data.Cast<double>().FindMinMaxInOn();
+            var m = (scaleMax - scaleMin) / (Max - Min);
+            var c = scaleMin - Min * m;
+            var result = new double[enumerated.Length];
+
+            for (int i = 0; i < enumerated.Length; ++i)
             {
-                yield return m * Convert.ToDouble(item) + c;
+                result[i] = m * Convert.ToDouble(enumerated[i]) + c;
             }
+            return result;
         }
 
         public static T Fit<T>(this T value, T min, T max) where T : IComparable<T>
