@@ -618,21 +618,21 @@ namespace Extensions.Standard
             return scaleMin + value * scaleMax - value * scaleMin;
         }
 
-        public static double Scale(this double value, double scaleMin, double scaleMax)
+        public static double Scale(this double value, (double Min, double Max) scale)
         {
-            if (scaleMin > scaleMax) throw new ArgumentOutOfRangeException(nameof(scaleMin));
-            var tmp = value * (scaleMax - scaleMin);
+            if (scale.Min > scale.Max) throw new ArgumentOutOfRangeException(nameof(scale.Min));
+            var tmp = value * (scale.Max - scale.Min);
             if (double.IsInfinity(tmp) && value.InClosedRange(0.0, 1.0))
             {
-                return value.ScaleSafe(scaleMin, scaleMax);
+                return value.ScaleSafe(scale.Min, scale.Max);
             }
-            return scaleMin + tmp;
+            return scale.Min + tmp;
         }
 
-        public static double Scale(this double value, double dataMin, double dataMax, double scaleMin, double scaleMax)
+        public static double Scale(this double value, (double Min, double Max) data, (double Min, double Max) scale)
         {
-            var m = (scaleMax - scaleMin) / (dataMax - dataMin);
-            var c = scaleMin - dataMin * m;
+            var m = (scale.Max - scale.Min) / (data.Max - data.Min);
+            var c = scale.Min - data.Min * m;
             return m * value + c;
         }
 
@@ -648,13 +648,12 @@ namespace Extensions.Standard
             return (Min: dataMin, Max: dataMax);
         }
 
-        public static IEnumerable<double> Scale(this IEnumerable<double> data, double scaleMin = 0.0D,
-            double scaleMax = 1.0D)
+        public static IEnumerable<double> Scale(this IEnumerable<double> data, (double Min, double Max) scale)
         {
             var enumerated = data as double[] ?? data.ToArray();
             var (Min, Max) = data.FindMinMaxInOn();
-            var m = (scaleMax - scaleMin) / (Max - Min);
-            var c = scaleMin - Min * m;
+            var m = (scale.Max - scale.Min) / (Max - Min);
+            var c = scale.Min - Min * m;
             var result = new double[enumerated.Length];
 
             for (int i = 0; i < enumerated.Length; ++i)
@@ -663,14 +662,17 @@ namespace Extensions.Standard
             }
             return result;
         }
+        public static IEnumerable<double> Scale(this IEnumerable<double> data)
+        {
+            return  Scale(data, (Min: 0, Max: 1.0));
+        }
 
-        public static IEnumerable<double> Scale<T>(this IEnumerable<T> data, double scaleMin = 0.0D,
-            double scaleMax = 1.0D) where T : IConvertible
+        public static IEnumerable<double> Scale<T>(this IEnumerable<T> data, (double Min, double Max) scale) where T : IConvertible
         {
             var enumerated = data as T[] ?? data.ToArray();
             var (Min, Max) = data.Cast<double>().FindMinMaxInOn();
-            var m = (scaleMax - scaleMin) / (Max - Min);
-            var c = scaleMin - Min * m;
+            var m = (scale.Max - scale.Min) / (Max - Min);
+            var c = scale.Min - Min * m;
             var result = new double[enumerated.Length];
 
             for (int i = 0; i < enumerated.Length; ++i)
@@ -678,6 +680,10 @@ namespace Extensions.Standard
                 result[i] = m * Convert.ToDouble(enumerated[i]) + c;
             }
             return result;
+        }
+        public static IEnumerable<double> Scale<T>(this IEnumerable<double> data) where T : IConvertible
+        {
+            return Scale(data, (Min: 0, Max: 1.0));
         }
 
         public static T Fit<T>(this T value, T min, T max) where T : IComparable<T>

@@ -14,8 +14,8 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
-    <Version>3.1.0</Version>
-    <PackageReleaseNotes>Fix major bug in Constants</PackageReleaseNotes>
+    <Version>4.0.0</Version>
+    <PackageReleaseNotes>Change parameters like min, max to named tuples (double min, double max) in functions, where mismatch would be catastrophic.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -146,7 +146,7 @@ namespace Extensions.Standard.Test
             var fromMin = 12131229.1;
             var fromMax = 124444.0;
             var expected = (max - min) * (value - fromMin) / (fromMax - fromMin) + min;
-            var received = value.Scale(fromMin, fromMax, min, max);
+            var received = value.Scale((fromMin, fromMax), (min, max));
             Assert.Equal(Math.Round(expected, Precision), Math.Round(received, Precision));
         }
 
@@ -162,7 +162,7 @@ namespace Extensions.Standard.Test
             const double max = 129.43;
             const double min = 124.123;
             var expected = min + value * (max - min);
-            var received = value.Scale(min, max);
+            var received = value.Scale((min, max));
             Assert.Equal(Math.Round(expected, Precision), Math.Round(received, Precision));
         }
 
@@ -203,7 +203,7 @@ namespace Extensions.Standard.Test
             double max = 10;
             double min = -10;
             var value = factor;
-            var received = value.Scale(min, max);
+            var received = value.Scale((min, max));
             Assert.False(double.IsInfinity(received));
         }
 
@@ -214,7 +214,7 @@ namespace Extensions.Standard.Test
             var max = 1e+77;
             var min = -1e+77;
             var value = factor;
-            var received = value.Scale(min, max);
+            var received = value.Scale((min, max));
             Assert.False(double.IsInfinity(received));
         }
 
@@ -228,15 +228,15 @@ namespace Extensions.Standard.Test
             var max = factor;
             var min = -factor;
             var value = factor;
-            var received = value.Scale(min, max);
+            var received = value.Scale((min, max));
             Assert.False(double.IsInfinity(received));
         }
 
         [Fact]
         public void ScaleTestBorderCase11()
         {
-            var half = 0.5.Scale(double.MinValue - 1E+10, double.MaxValue);
-            var two = 2.0.Scale(double.MinValue / 2, double.MaxValue / 2);
+            var half = 0.5.Scale((double.MinValue - 1E+10, double.MaxValue));
+            var two = 2.0.Scale((double.MinValue / 2, double.MaxValue / 2));
         }
         [Fact]
         public void ScaleTestBorderCase0()
@@ -244,7 +244,7 @@ namespace Extensions.Standard.Test
             const double max = double.MaxValue / 1.5;
             const double min = double.MinValue / 1.5;
             const double value = 0.99;
-            var received = value.Scale(min, max);
+            var received = value.Scale((min, max));
             var expected = min + value * max - value * min;
             Assert.Equal(Math.Round(expected, Precision), Math.Round(received, Precision));
         }
@@ -255,7 +255,7 @@ namespace Extensions.Standard.Test
             const double max = 0;
             const double min = double.MinValue;
             const double value = 1.0;
-            var received = value.Scale(min, max);
+            var received = value.Scale((min, max));
             Assert.Equal(Math.Round(max, Precision), Math.Round(received, Precision));
         }
 
@@ -265,7 +265,7 @@ namespace Extensions.Standard.Test
             const double max = double.MaxValue;
             const double min = 0;
             const double value = 1.0;
-            var received = value.Scale(min, max);
+            var received = value.Scale((min, max));
             Assert.Equal(Math.Round(max, Precision), Math.Round(received, Precision));
         }
 
@@ -339,7 +339,7 @@ namespace Extensions.Standard.Test
                 expected.Add((scaleMax - scaleMin) * (value - dataMin) / (dataMax - dataMin) + scaleMin);
             }
 
-            var received = testSequece.Scale(scaleMin, scaleMax);
+            var received = testSequece.Scale((scaleMin, scaleMax));
 
             using (var receivedIter = received.GetEnumerator())
             using (var expectedIter = expected.GetEnumerator())
