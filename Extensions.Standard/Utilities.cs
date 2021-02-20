@@ -709,16 +709,16 @@ namespace Extensions.Standard
 
         #region Reflection
 
-        public static string GetAllPublicPropertiesValues<T>(this T input, string separator = ", ", string keyValueSeparator = " = ")
+        public static Dictionary<string, string> GetAllPublicPropertiesValues<T>(this T input)
         {
-            var settings = new Dictionary<string, string>();
+            var properties = new Dictionary<string, string>();
             foreach (var propertyInfo in typeof(T).GetProperties(BindingFlags.Public |
                                                                                BindingFlags.Instance))
             {
-                settings.Add(propertyInfo.Name, propertyInfo.GetValue(input).ToString());
+                properties.Add(propertyInfo.Name, propertyInfo.GetValue(input).ToString());
             }
 
-            return string.Join(separator, settings.Select(x => $"{x.Key}{keyValueSeparator}{x.Value}"));
+            return properties;
         }
 
         #endregion

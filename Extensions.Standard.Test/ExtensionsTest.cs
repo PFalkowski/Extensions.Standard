@@ -917,7 +917,9 @@ namespace Extensions.Standard.Test
 
             var result = poco.GetAllPublicPropertiesValues();
 
-            Assert.Equal("TestInt = 10, TestString = 20, TestObject = ccc", result);
+            Assert.Equal("10", result["TestInt"]);
+            Assert.Equal("20", result["TestString"]);
+            Assert.Equal("ccc", result["TestObject"]);
         }
 
         #region Unit test related
