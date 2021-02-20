@@ -2,7 +2,7 @@
 
 namespace Extensions.Standard.Test
 {
-    public class Extensions
+    public class ConstantsTest
     {
         [Fact]
         public void KiloByteMegaByteGigaBytePeByteExaByte()

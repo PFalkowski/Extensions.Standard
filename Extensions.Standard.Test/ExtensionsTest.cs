@@ -505,7 +505,7 @@ namespace Extensions.Standard.Test
         }
 
         [Theory]
-        [InlineData(1024, "1 "+ Constants.KibibyteSuffix)]
+        [InlineData(1024, "1 " + Constants.KibibyteSuffix)]
         [InlineData(1024 + 512, "1.5 " + Constants.KibibyteSuffix)]
         [InlineData(1024 * 1024, "1 " + Constants.MebibyteSuffix)]
         [InlineData(1024 * (1024 + 512), "1.5 " + Constants.MebibyteSuffix)]
@@ -901,6 +901,23 @@ namespace Extensions.Standard.Test
             {
                 Assert.Equal(result[i][0], input[i]);
             }
+        }
+
+        private class PoCo
+        {
+            public int TestInt { get; } = 10;
+            public string TestString { get; set; } = "20";
+            public object TestObject { get; set; } = new string('c', 3);
+        }
+
+        [Fact]
+        public void PrintAllPropertiesPrintsPropertiesAndValuesSeparated()
+        {
+            var poco = new PoCo();
+
+            var result = poco.GetAllPublicPropertiesValues();
+
+            Assert.Equal("TestInt=10, TestString=20, TestObject=ccc", result);
         }
 
         #region Unit test related

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Extensions.Standard
@@ -704,6 +705,22 @@ namespace Extensions.Standard
             if (string.IsNullOrEmpty(value)) return value;
             return value.Length <= maxLength ? value : value.Substring(0, maxLength);
         }
+        #endregion
+
+        #region Reflection
+
+        public static string GetAllPublicPropertiesValues<T>(this T input)
+        {
+            var settings = new Dictionary<string, string>();
+            foreach (var propertyInfo in typeof(T).GetProperties(BindingFlags.Public |
+                                                                               BindingFlags.Instance))
+            {
+                settings.Add(propertyInfo.Name, propertyInfo.GetValue(input).ToString());
+            }
+
+            return string.Join(", ", settings.Select(x => $"{x.Key}={x.Value}"));
+        }
+
         #endregion
     }
 }
