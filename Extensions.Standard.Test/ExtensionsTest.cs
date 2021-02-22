@@ -293,6 +293,22 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
+        public void InOpenRangeTestDates()
+        {
+            var from = new DateTime(2020, 01, 01);
+            var to = new DateTime(2021, 01, 01);
+
+            Assert.False(new DateTime(1000, 01, 01).InOpenRange(from, to));
+            Assert.False(new DateTime(2000, 01, 01).InOpenRange(from, to));
+            Assert.True(new DateTime(2020, 01, 01).InOpenRange(from, to));
+            Assert.True(new DateTime(2020, 02, 01).InOpenRange(from, to));
+            Assert.True(new DateTime(2020, 01, 02).InOpenRange(from, to));
+            Assert.True(new DateTime(2021, 01, 01).InOpenRange(from, to));
+            Assert.False(new DateTime(2021, 02, 01).InOpenRange(from, to));
+            Assert.False(new DateTime(2099, 02, 01).InOpenRange(from, to));
+        }
+
+        [Fact]
         public void InClosedRangeTest()
         {
             var val = 1234;
@@ -301,6 +317,22 @@ namespace Extensions.Standard.Test
             var expected = val > from && val < to;
             var actual = val.InClosedRange(from, to);
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void InClosedRangeTestDates()
+        {
+            var from = new DateTime(2020, 01, 01);
+            var to = new DateTime(2021, 01, 01);
+
+            Assert.False(new DateTime(1000, 01, 01).InClosedRange(from, to));
+            Assert.False(new DateTime(2000, 01, 01).InClosedRange(from, to));
+            Assert.False(new DateTime(2020, 01, 01).InClosedRange(from, to));
+            Assert.True(new DateTime(2020, 02, 01).InClosedRange(from, to));
+            Assert.True(new DateTime(2020, 01, 02).InClosedRange(from, to));
+            Assert.False(new DateTime(2021, 01, 01).InClosedRange(from, to));
+            Assert.False(new DateTime(2021, 02, 01).InClosedRange(from, to));
+            Assert.False(new DateTime(2099, 02, 01).InClosedRange(from, to));
         }
 
         [Fact]
