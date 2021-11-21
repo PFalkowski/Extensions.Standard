@@ -310,7 +310,64 @@ namespace Extensions.Standard
             }
             return index;
         }
+        
+        public static string Head<T>(this IList<T> input, int n)
+        {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+            if (!input.Any())
+                return string.Empty;
+            if (n > input.Count)
+                throw new ArgumentOutOfRangeException(nameof(n));
 
+            var stb = new StringBuilder();
+            stb.AppendLine();
+            stb.AppendJoin(Environment.NewLine, input.Take(n));
+            stb.AppendLine();
+            stb.AppendLine("...");
+            stb.AppendLine();
+
+            return stb.ToString();
+        }
+
+        public static string Tail<T>(this IList<T> input, int n)
+        {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+            if (!input.Any())
+                return string.Empty;
+            if (n > input.Count)
+                throw new ArgumentOutOfRangeException(nameof(n));
+
+            var stb = new StringBuilder();
+            stb.AppendLine();
+            stb.AppendLine("...");
+            stb.AppendJoin(Environment.NewLine, input.Skip(input.Count -n));
+            stb.AppendLine();
+
+            return stb.ToString();
+        }
+
+        
+        public static string HeadAndTail<T>(this IList<T> input, int n)
+        {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+            if (!input.Any())
+                return string.Empty;
+            if (n > input.Count)
+                throw new ArgumentOutOfRangeException(nameof(n));
+
+            var stb = new StringBuilder();
+            stb.AppendLine();
+            stb.AppendJoin(Environment.NewLine, input.Take(n));
+            stb.AppendLine();
+            stb.AppendLine("...");
+            stb.AppendJoin(Environment.NewLine, input.Skip(input.Count -n));
+            stb.AppendLine();
+
+            return stb.ToString();
+        }
         #endregion
 
         #region Colors
@@ -665,7 +722,7 @@ namespace Extensions.Standard
         }
         public static IEnumerable<double> Scale(this IEnumerable<double> data)
         {
-            return  Scale(data, (Min: 0, Max: 1.0));
+            return Scale(data, (Min: 0, Max: 1.0));
         }
 
         public static IEnumerable<double> Scale<T>(this IEnumerable<T> data, (double Min, double Max) scale) where T : IConvertible
@@ -715,7 +772,8 @@ namespace Extensions.Standard
             foreach (var propertyInfo in typeof(T).GetProperties(BindingFlags.Public |
                                                                                BindingFlags.Instance))
             {
-                properties.Add(propertyInfo.Name, propertyInfo.GetValue(input).ToString());
+                var value = propertyInfo.GetValue(input);
+                properties.Add(propertyInfo.Name, value == null ? "null" : value.ToString());
             }
 
             return properties;
