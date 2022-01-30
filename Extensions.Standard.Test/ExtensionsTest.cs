@@ -937,21 +937,54 @@ namespace Extensions.Standard.Test
 
         private class PoCo
         {
+            private string test = "DoNotShowThis";
+            private string test2 { get; set; } = "DoNotShowThis";
             public int TestInt { get; } = 10;
             public string TestString { get; set; } = "20";
             public object TestObject { get; set; } = new string('c', 3);
+            public double TestDouble { get; set; } = Math.PI;
         }
 
         [Fact]
-        public void PrintAllPropertiesPrintsPropertiesAndValuesSeparated()
+        public void GetAllPublicPropertiesValuesReturnsCorrectDynamics()
         {
             var poco = new PoCo();
 
             var result = poco.GetAllPublicPropertiesValues();
 
-            Assert.Equal("10", result["TestInt"]);
+            Assert.False(result.ContainsKey("test"));
+            Assert.False(result.ContainsKey("test2"));
+            Assert.Equal(10, result["TestInt"]);
             Assert.Equal("20", result["TestString"]);
             Assert.Equal("ccc", result["TestObject"]);
+            Assert.Equal(Math.PI, (double)result["TestDouble"]);
+        }
+
+        [Fact]
+        public void GetAllPublicPropertiesValuesCanBeStringified()
+        {
+            var poco = new PoCo();
+
+            var result = poco.GetAllPublicPropertiesValues();
+
+            Assert.False(result.ContainsKey("test"));
+            Assert.False(result.ContainsKey("test2"));
+            Assert.Equal("10", result["TestInt"].ToString());
+            Assert.Equal("20", result["TestString"]);
+            Assert.Equal("ccc", result["TestObject"]);
+            Assert.Equal(Math.PI.ToString(), result["TestDouble"].ToString());
+        }
+
+        [Theory]
+        [InlineData("test", 10, "   test   ")]
+        [InlineData("test123", 10, " test123 ")]
+        [InlineData("tes111111t", 10, "tes111111t")]
+        [InlineData("testasdsadasdasdasdasd", 10, "testasdsadasdasdasdasd")]
+        [InlineData("testasdsadasdasdasdasd", 30, "    testasdsadasdasdasdasd    ")]
+        public void CenterTextCenters(string text, int lineLenght, string expected)
+        {
+            var actual = text.CenterText(lineLenght);
+            Assert.Equal(expected, actual);
         }
 
         #region Unit test related

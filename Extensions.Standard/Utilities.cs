@@ -368,6 +368,14 @@ namespace Extensions.Standard
 
             return stb.ToString();
         }
+
+        public static string CenterText(this string text, int totalLengthOfLine)
+        {
+            var blanksCount = totalLengthOfLine - text.Length > 0 ? (totalLengthOfLine - text.Length) / 2 : 0;
+            var blanks = string.Join("", Enumerable.Repeat(' ', blanksCount));
+
+            return $"{blanks}{text}{blanks}";
+        }
         #endregion
 
         #region Colors
@@ -766,14 +774,14 @@ namespace Extensions.Standard
 
         #region Reflection
 
-        public static Dictionary<string, string> GetAllPublicPropertiesValues<T>(this T input)
+        public static Dictionary<string, dynamic> GetAllPublicPropertiesValues<T>(this T input)
         {
-            var properties = new Dictionary<string, string>();
+            var properties = new Dictionary<string, dynamic>();
             foreach (var propertyInfo in typeof(T).GetProperties(BindingFlags.Public |
                                                                                BindingFlags.Instance))
             {
                 var value = propertyInfo.GetValue(input);
-                properties.Add(propertyInfo.Name, value == null ? "null" : value.ToString());
+                properties.Add(propertyInfo.Name, value);
             }
 
             return properties;
