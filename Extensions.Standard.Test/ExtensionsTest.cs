@@ -987,6 +987,18 @@ namespace Extensions.Standard.Test
             Assert.Equal(expected, actual);
         }
 
+        [Theory]
+        [InlineData("test", 10, 'v', "vvvtestvvv")]
+        [InlineData("test123", 10, '*', "*test123*")]
+        [InlineData("tes111111t", 10, '*', "tes111111t")]
+        [InlineData("testasdsadasdasdasdasd", 10, '*', "testasdsadasdasdasdasd")]
+        [InlineData("testasdsadasdasdasdasd", 30, '*', "****testasdsadasdasdasdasd****")]
+        public void CenterTextCentersWithCustomFill(string text, int lineLenght, char fill, string expected)
+        {
+            var actual = text.CenterText(lineLenght, fill);
+            Assert.Equal(expected, actual);
+        }
+
         #region Unit test related
 
         private static IList<double> SoftmaxNaive(IList<double> input)

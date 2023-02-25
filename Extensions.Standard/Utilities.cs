@@ -369,12 +369,12 @@ namespace Extensions.Standard
             return stb.ToString();
         }
 
-        public static string CenterText(this string text, int totalLengthOfLine)
+        public static string CenterText(this string text, int totalLengthOfLine, char fill = ' ')
         {
-            var blanksCount = totalLengthOfLine - text.Length > 0 ? (totalLengthOfLine - text.Length) / 2 : 0;
-            var blanks = string.Join("", Enumerable.Repeat(' ', blanksCount));
+            var fillsCount = totalLengthOfLine - text.Length > 0 ? (totalLengthOfLine - text.Length) / 2 : 0;
+            var fillsHalf = string.Join("", Enumerable.Repeat(fill, fillsCount));
 
-            return $"{blanks}{text}{blanks}";
+            return $"{fillsHalf}{text}{fillsHalf}";
         }
         #endregion
 
