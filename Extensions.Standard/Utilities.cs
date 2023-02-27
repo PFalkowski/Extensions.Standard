@@ -272,6 +272,13 @@ namespace Extensions.Standard
             return Math.Abs(lhs - rhs) <= delta;
         }
 
+        /// <summary>
+        /// Verifies whether the collections have same elements within the <paramref name="tolerance"/> in same order.
+        /// </summary>
+        /// <param name="seqenceA"></param>
+        /// <param name="seqenceB"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
         public static bool SequenceEquals(this IEnumerable<double> seqenceA, IEnumerable<double> seqenceB, double tolerance)
         {
             if (seqenceA == null && seqenceB == null) return true;
@@ -288,8 +295,15 @@ namespace Extensions.Standard
                 }
             }
             return true;
-        }        
+        }
 
+        /// <summary>
+        /// Verifies if the collections have exactly same elements in any order.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collectionLhs"></param>
+        /// <param name="collectionRhs"></param>
+        /// <returns></returns>
         public static bool IsEquivalent<T>(this IEnumerable<T> collectionLhs, IEnumerable<T> collectionRhs)
         {
             var result = true;
