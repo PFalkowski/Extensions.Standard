@@ -288,6 +288,34 @@ namespace Extensions.Standard
                 }
             }
             return true;
+        }        
+
+        public static bool IsEquivalent<T>(this IEnumerable<T> collectionLhs, IEnumerable<T> collectionRhs)
+        {
+            var result = true;
+            if (collectionLhs == null && collectionRhs == null)
+            {
+                return true;
+            }
+
+            if (collectionLhs == null || collectionRhs == null)
+            {
+                return false;
+            }
+            var listA = collectionLhs as IList<T> ?? collectionLhs.ToList();
+            var listB = collectionRhs as HashSet<T> ?? collectionRhs.ToHashSet();
+
+            if (listA.Count != listB.Count)
+            {
+                return false;
+            }
+
+            foreach (var listAItem in listA)
+            {
+                result = listB.Contains(listAItem);
+            }
+
+            return result;
         }
 
         /// <summary>

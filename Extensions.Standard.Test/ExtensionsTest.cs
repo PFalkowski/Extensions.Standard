@@ -999,6 +999,22 @@ namespace Extensions.Standard.Test
             Assert.Equal(expected, actual);
         }
 
+        [Theory]
+        [InlineData(default(List<string>), default(List<string>), true)]
+        [InlineData(default(List<string>), new string[0], false)]
+        [InlineData(new string[0], new string[0], true)]
+        [InlineData(new[] { "" }, new string[0], false)]
+        [InlineData(new[] { "" }, new[] { "" }, true)]
+        [InlineData(new[] { "1", "2", "3" }, new[] { "1", "2", "3" }, true)]
+        [InlineData(new[] { "1", "2", "3" }, new[] { "3", "2", "1" }, true)]
+        [InlineData(new[] { "3", "1", "2" }, new[] { "2", "1", "3" }, true)]
+        [InlineData(new[] { "1", "2", "3" }, new[] { "1", "2", "3", "4" }, false)]
+        [InlineData(new[] { "1", "2", "3", "4" }, new[] { "1", "2", "3" }, false)]
+        public void IsEquivalentIsCorrect(IEnumerable<string> lhs, IEnumerable<string> rhs, bool expectedResult)
+        {
+            //Assert, Arrange & Act
+            Assert.Equal(expectedResult, Utilities.IsEquivalent(lhs, rhs));
+        }
         #region Unit test related
 
         private static IList<double> SoftmaxNaive(IList<double> input)
