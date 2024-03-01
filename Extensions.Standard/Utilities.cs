@@ -62,6 +62,7 @@ namespace Extensions.Standard
         {
             return p1[1] + ((x - p1[0]) * p2[1] - (x - p1[0]) * p1[1]) / (p2[0] - p1[0]);
         }
+
         /// <summary>
         ///     Calculate area of a polygon defined by points in <paramref name="polygon"/>.
         /// </summary>
@@ -535,6 +536,7 @@ namespace Extensions.Standard
             }
             return $"{Math.Round(bytesConverted / Constants.ZiB, decimals).ToString(numberFormat)} {Constants.YobibyteSuffix}";
         }
+
         /// <summary>
         ///     Provide number of bytes and receive user friendly string. This method uses decimal orders of magnitude of data (KB = kilobyte = 1000 bytes), for binary use AsMemory. 
         /// </summary>
@@ -583,7 +585,7 @@ namespace Extensions.Standard
         }
 
         /// <summary>
-        ///     Present miliseconds as h + min + sec and ms.
+        ///     Present milliseconds as h + min + sec and ms.
         ///     Works like TimeSpan.FromSeconds but faster. Appends information about what is what (ex. days, hours etc.).
         /// </summary>
         /// <param name="timeElapsed"></param>
@@ -616,7 +618,7 @@ namespace Extensions.Standard
         }
 
         /// <summary>
-        ///     Present miliseconds as h + min + sec and ms.
+        ///     Present milliseconds as h + min + sec and ms.
         ///     Works like TimeSpan.FromSeconds but faster. Appends information about what is what (ex. days, hours etc.).
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -660,9 +662,9 @@ namespace Extensions.Standard
         }
 
         /// <summary>
-        ///     Present miliseconds as hours + minutes + seconds and milliseconds.
+        ///     Present milliseconds as hours + minutes + seconds and milliseconds.
         /// </summary>
-        /// <param name="milliseconds">miliseconds</param>
+        /// <param name="milliseconds">milliseconds</param>
         /// <returns></returns>
         internal static string AsTimeVerbose(this long milliseconds)
         {
@@ -759,9 +761,9 @@ namespace Extensions.Standard
         public static IEnumerable<double> Scale(this IEnumerable<double> data, (double Min, double Max) scale)
         {
             var enumerated = data as double[] ?? data.ToArray();
-            var (Min, Max) = data.FindMinMaxInOn();
-            var m = (scale.Max - scale.Min) / (Max - Min);
-            var c = scale.Min - Min * m;
+            var (min, max) = data.FindMinMaxInOn();
+            var m = (scale.Max - scale.Min) / (max - min);
+            var c = scale.Min - min * m;
             var result = new double[enumerated.Length];
 
             for (int i = 0; i < enumerated.Length; ++i)
@@ -770,6 +772,7 @@ namespace Extensions.Standard
             }
             return result;
         }
+
         public static IEnumerable<double> Scale(this IEnumerable<double> data)
         {
             return Scale(data, (Min: 0, Max: 1.0));
@@ -778,9 +781,9 @@ namespace Extensions.Standard
         public static IEnumerable<double> Scale<T>(this IEnumerable<T> data, (double Min, double Max) scale) where T : IConvertible
         {
             var enumerated = data as T[] ?? data.ToArray();
-            var (Min, Max) = data.Cast<double>().FindMinMaxInOn();
-            var m = (scale.Max - scale.Min) / (Max - Min);
-            var c = scale.Min - Min * m;
+            var (min, max) = enumerated.Cast<double>().FindMinMaxInOn();
+            var m = (scale.Max - scale.Min) / (max - min);
+            var c = scale.Min - min * m;
             var result = new double[enumerated.Length];
 
             for (int i = 0; i < enumerated.Length; ++i)
@@ -789,6 +792,7 @@ namespace Extensions.Standard
             }
             return result;
         }
+
         public static IEnumerable<double> Scale<T>(this IEnumerable<double> data) where T : IConvertible
         {
             return Scale(data, (Min: 0, Max: 1.0));

@@ -14,8 +14,8 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
-    <Version>8.1.0</Version>
-    <PackageReleaseNotes>Move to net6.0</PackageReleaseNotes>
+    <Version>8.2.0</Version>
+    <PackageReleaseNotes>Add method IsEquivalent, verifying if the collections have exactly same elements in any order.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
