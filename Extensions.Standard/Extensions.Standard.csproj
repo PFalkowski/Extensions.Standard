@@ -7,15 +7,15 @@
 Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, InnerProduct, IsPrime, ManhattanDistance, EuclideanDistance, InClosedRange, MeanSquaredError, EqualsWithTolerance, HsVtoArgb, Scale, Fit and many more.</Description>
     <Company>Piotr Falkowski</Company>
     <Authors>Piotr Falkowski</Authors>
-    <Copyright>Piotr Falkowski © 2023</Copyright>
+    <Copyright>Piotr Falkowski © 2024</Copyright>
     <PackageLicenseUrl></PackageLicenseUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/PFalkowski/Extensions.Standard</PackageProjectUrl>
     <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
-    <Version>8.2.0</Version>
-    <PackageReleaseNotes>Add method IsEquivalent, verifying if the collections have exactly same elements in any order.</PackageReleaseNotes>
+    <Version>8.3.0</Version>
+    <PackageReleaseNotes>Add ToShuffled(), change signature of Shuffle - rand is now optional param.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
