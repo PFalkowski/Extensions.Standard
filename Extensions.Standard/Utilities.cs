@@ -236,7 +236,7 @@ namespace Extensions.Standard
         /// <param name="input"></param>
         /// <param name="rand"></param>
         /// <returns>new collection with randomized order.</returns>
-        public static List<T> ToShuffled<T>(this IEnumerable<T> input, Random rand = null)
+        public static List<T> ToShuffledList<T>(this IEnumerable<T> input, Random rand = null)
         {
             var list = input.ToList();
 

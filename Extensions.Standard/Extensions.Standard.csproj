@@ -14,8 +14,8 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
-    <Version>8.3.0</Version>
-    <PackageReleaseNotes>Add ToShuffled(), change signature of Shuffle - rand is now optional param.</PackageReleaseNotes>
+    <Version>9.0.0</Version>
+    <PackageReleaseNotes>Change naming: ToShuffled -> ToShuffledList</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
