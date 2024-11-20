@@ -446,7 +446,7 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
-        public void EuclideanDistanceBiiggerValuesTest()
+        public void EuclideanDistanceBiggerValuesTest()
         {
             var sequence1 = new[] { -11111.0, 198989889.0, -123.9, 123, -99999.7 };
             var sequence2 = new[] { -11111.0, 198989889.0, -123.9, 123, -99999.7 };
@@ -756,6 +756,24 @@ namespace Extensions.Standard.Test
                 {
                     Assert.Equal(e1.Current, e2.Current);
                 }
+            }
+        }
+
+        [Fact]
+        public void ShuffleIEnumerableTest1()
+        {
+            var randomSubstitute = Substitute.For<Random>();
+            randomSubstitute.Next(Arg.Any<int>(), Arg.Any<int>()).Returns(1);
+            var original = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+            var tested = original.Shuffle(randomSubstitute);
+            var expected = new List<int> { 2, 10, 1, 3, 4, 5, 6, 7, 8, 9 };
+
+            using var e1 = tested.ToList().GetEnumerator();
+            using var e2 = expected.ToList().GetEnumerator();
+            while (e1.MoveNext() && e2.MoveNext())
+            {
+                Assert.Equal(e1.Current, e2.Current);
             }
         }
 

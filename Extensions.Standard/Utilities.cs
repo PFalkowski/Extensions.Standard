@@ -66,7 +66,7 @@ namespace Extensions.Standard
         /// <summary>
         ///     Calculate area of a polygon defined by points in <paramref name="polygon"/>.
         /// </summary>
-        /// <param name="polygon">Should contain consecutive points, index 0 for x and 1 for y. Further values will be omited.</param>
+        /// <param name="polygon">Should contain consecutive points, index 0 for x and 1 for y. Further values will be omitted.</param>
         /// <returns>Area</returns>
         public static double Area(this IList<double[]> polygon)
         {
@@ -199,35 +199,50 @@ namespace Extensions.Standard
             if (other == null) throw new ArgumentNullException(nameof(other));
             if (func == null) throw new ArgumentNullException(nameof(func));
 
-            using (var xIter = source.GetEnumerator())
-            using (var yIter = other.GetEnumerator())
+            using var xIter = source.GetEnumerator();
+            using var yIter = other.GetEnumerator();
+            var result = seed;
+            while (xIter.MoveNext() && yIter.MoveNext())
             {
-                var result = seed;
-                while (xIter.MoveNext() && yIter.MoveNext())
-                {
-                    result = func(result, xIter.Current, yIter.Current);
-                }
-                return result;
+                result = func(result, xIter.Current, yIter.Current);
             }
+            return result;
         }
 
         /// <summary>
-        ///     Knuth Shuffle - reorder items randomly in-place, with Fisher-Yates algorithm.
+        ///     Performs in-place Knuth Shuffle - reorder items randomly in-place, with Fisher-Yates algorithm.
         ///     O(n) complexity. see: http://rosettacode.org/wiki/Knuth_shuffle#C.23
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="input"></param>
         /// <param name="rand"></param>
         /// <returns></returns>
-        public static void Shuffle<T>(this IList<T> input, Random rand)
+        public static void Shuffle<T>(this IList<T> input, Random rand = null)
         {
+            rand ??= Random.Shared;
             for (var i = 0; i < input.Count; ++i)
             {
                 var j = rand.Next(i, input.Count);
-                var temp = input[i];
-                input[i] = input[j];
-                input[j] = temp;
+                (input[i], input[j]) = (input[j], input[i]);
             }
+        }
+
+        /// <summary>
+        ///     Performs Knuth Shuffle - place items randomly in new collection.
+        ///     Does not modify underlying collection.
+        ///     O(n) complexity. see: http://rosettacode.org/wiki/Knuth_shuffle#C.23
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="input"></param>
+        /// <param name="rand"></param>
+        /// <returns>new collection with randomized order.</returns>
+        public static List<T> ToShuffled<T>(this IEnumerable<T> input, Random rand = null)
+        {
+            var list = input.ToList();
+
+            list.Shuffle(rand);
+
+            return list;
         }
 
         public static List<List<T>> Partition<T>(this IEnumerable<T> input, decimal firstPartitionRatio)
@@ -287,14 +302,14 @@ namespace Extensions.Standard
             var listA = seqenceA as IList<double> ?? seqenceA.ToList();
             var listB = seqenceB as IList<double> ?? seqenceB.ToList();
             if (listA.Count != listB.Count) return false;
-            using (var e1 = listA.GetEnumerator())
-            using (var e2 = listB.GetEnumerator())
+
+            using var e1 = listA.GetEnumerator();
+            using var e2 = listB.GetEnumerator();
+            while (e1.MoveNext() && e2.MoveNext())
             {
-                while (e1.MoveNext() && e2.MoveNext())
-                {
-                    if (!e1.Current.EqualsWithTolerance(e2.Current, tolerance)) return false;
-                }
+                if (!e1.Current.EqualsWithTolerance(e2.Current, tolerance)) return false;
             }
+
             return true;
         }
 
@@ -334,7 +349,7 @@ namespace Extensions.Standard
         }
 
         /// <summary>
-        /// Largest value index. If the sequence contains more than one, first occurence's index will be returned.
+        /// Largest value index. If the sequence contains more than one, first occurrence's index will be returned.
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -353,7 +368,7 @@ namespace Extensions.Standard
             }
             return index;
         }
-        
+
         public static string Head<T>(this IList<T> input, int n)
         {
             if (input == null)
@@ -385,13 +400,13 @@ namespace Extensions.Standard
             var stb = new StringBuilder();
             stb.AppendLine();
             stb.AppendLine("...");
-            stb.AppendJoin(Environment.NewLine, input.Skip(input.Count -n));
+            stb.AppendJoin(Environment.NewLine, input.Skip(input.Count - n));
             stb.AppendLine();
 
             return stb.ToString();
         }
 
-        
+
         public static string HeadAndTail<T>(this IList<T> input, int n)
         {
             if (input == null)
@@ -406,7 +421,7 @@ namespace Extensions.Standard
             stb.AppendJoin(Environment.NewLine, input.Take(n));
             stb.AppendLine();
             stb.AppendLine("...");
-            stb.AppendJoin(Environment.NewLine, input.Skip(input.Count -n));
+            stb.AppendJoin(Environment.NewLine, input.Skip(input.Count - n));
             stb.AppendLine();
 
             return stb.ToString();
@@ -538,7 +553,7 @@ namespace Extensions.Standard
         }
 
         /// <summary>
-        ///     Provide number of bytes and receive user friendly string. This method uses decimal orders of magnitude of data (KB = kilobyte = 1000 bytes), for binary use AsMemory. 
+        ///     Provide number of bytes and receive user-friendly string. This method uses decimal orders of magnitude of data (KB = kilobyte = 1000 bytes), for binary use AsMemory. 
         /// </summary>
         /// <param name="bytes"></param>
         /// <param name="decimals">The number of decimal places in return value</param>
@@ -808,12 +823,15 @@ namespace Extensions.Standard
             {
                 return min;
             }
+
             return value.CompareTo(max) > 0 ? max : value;
         }
 
         public static string Truncate(this string value, int maxLength)
         {
-            if (string.IsNullOrEmpty(value)) return value;
+            if (string.IsNullOrEmpty(value))
+                return value;
+
             return value.Length <= maxLength ? value : value.Substring(0, maxLength);
         }
         #endregion
