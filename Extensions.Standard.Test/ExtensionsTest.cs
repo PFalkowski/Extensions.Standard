@@ -766,7 +766,7 @@ namespace Extensions.Standard.Test
             randomSubstitute.Next(Arg.Any<int>(), Arg.Any<int>()).Returns(1);
             var original = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-            var tested = original.Shuffle(randomSubstitute);
+            var tested = original.ToShuffled(randomSubstitute);
             var expected = new List<int> { 2, 10, 1, 3, 4, 5, 6, 7, 8, 9 };
 
             using var e1 = tested.ToList().GetEnumerator();
