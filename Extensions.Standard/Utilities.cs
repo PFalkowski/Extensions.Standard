@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Extensions.Standard
 {
@@ -851,6 +852,12 @@ namespace Extensions.Standard
             return properties;
         }
 
+        public static T DeepCopy<T>(this T original, JsonSerializerSettings settings = null)
+        {
+            return settings == null 
+                ? JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(original)) 
+                : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(original, settings), settings);
+        }
         #endregion
     }
 }

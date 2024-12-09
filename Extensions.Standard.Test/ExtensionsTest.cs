@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Xunit;
 using NSubstitute;
+using Newtonsoft.Json;
 
 namespace Extensions.Standard.Test
 {
@@ -373,13 +374,11 @@ namespace Extensions.Standard.Test
 
             var received = testSequece.Scale((scaleMin, scaleMax));
 
-            using (var receivedIter = received.GetEnumerator())
-            using (var expectedIter = expected.GetEnumerator())
+            using var receivedIter = received.GetEnumerator();
+            using var expectedIter = expected.GetEnumerator();
+            while (receivedIter.MoveNext() && expectedIter.MoveNext())
             {
-                while (receivedIter.MoveNext() && expectedIter.MoveNext())
-                {
-                    Assert.Equal(Math.Round(expectedIter.Current, 5), Math.Round(receivedIter.Current, 5));
-                }
+                Assert.Equal(Math.Round(expectedIter.Current, 5), Math.Round(receivedIter.Current, 5));
             }
         }
 
@@ -742,20 +741,33 @@ namespace Extensions.Standard.Test
         {
             var randomSubstitute = Substitute.For<Random>();
             randomSubstitute.Next(Arg.Any<int>(), Arg.Any<int>()).Returns(1);
-            var original = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-
-            var tested = original;
+            var tested = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
             tested.Shuffle(randomSubstitute);
             var expected = new List<int> { 2, 10, 1, 3, 4, 5, 6, 7, 8, 9 };
 
-            using (var e1 = tested.ToList().GetEnumerator())
-            using (var e2 = expected.ToList().GetEnumerator())
+            using var e1 = tested.ToList().GetEnumerator();
+            using var e2 = expected.ToList().GetEnumerator();
+            while (e1.MoveNext() && e2.MoveNext())
             {
-                while (e1.MoveNext() && e2.MoveNext())
-                {
-                    Assert.Equal(e1.Current, e2.Current);
-                }
+                Assert.Equal(e1.Current, e2.Current);
+            }
+        }
+
+        [Fact]
+        public void ShuffleTest2()
+        {
+            var random = new Random(0);
+            var tested = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+            tested.Shuffle(random);
+            var expected = new List<int> { 8, 9, 2, 7, 6, 1, 10, 3, 4, 5 };
+
+            using var e1 = tested.ToList().GetEnumerator();
+            using var e2 = expected.ToList().GetEnumerator();
+            while (e1.MoveNext() && e2.MoveNext())
+            {
+                Assert.Equal(e1.Current, e2.Current);
             }
         }
 
@@ -784,13 +796,11 @@ namespace Extensions.Standard.Test
             var expected = SoftmaxNaive(testedVec.ToList());
             var received = testedVec.ToList().Softmax();
 
-            using (var recEnum = received.ToList().GetEnumerator())
-            using (var expEnum = expected.ToList().GetEnumerator())
+            using var recEnum = received.ToList().GetEnumerator();
+            using var expEnum = expected.ToList().GetEnumerator();
+            while (recEnum.MoveNext() && expEnum.MoveNext())
             {
-                while (recEnum.MoveNext() && expEnum.MoveNext())
-                {
-                    Assert.Equal(Math.Round(recEnum.Current, Precision), Math.Round(expEnum.Current, Precision));
-                }
+                Assert.Equal(Math.Round(recEnum.Current, Precision), Math.Round(expEnum.Current, Precision));
             }
         }
 
@@ -1033,7 +1043,60 @@ namespace Extensions.Standard.Test
             //Assert, Arrange & Act
             Assert.Equal(expectedResult, Utilities.IsEquivalent(lhs, rhs));
         }
+
+        [Fact]
+        public void DeepCopy_DefaultSettings_ReturnsDeepCopy()
+        {
+            // Arrange
+            var original = new TestClass { Id = 1, Name = "Test" };
+
+            // Act
+            var copy = original.DeepCopy();
+
+            // Assert
+            Assert.NotSame(original, copy);
+            Assert.Equal(original.Id, copy.Id);
+            Assert.Equal(original.Name, copy.Name);
+        }
+
+        [Fact]
+        public void DeepCopy_CustomSettings_HandlesCustomSerialization()
+        {
+            // Arrange
+            var original = new TestClass { Id = 1, Name = "Test" };
+            var settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+
+            // Act
+            var copy = original.DeepCopy(settings);
+
+            // Assert
+            Assert.NotSame(original, copy);
+            Assert.Equal(original.Id, copy.Id);
+            Assert.Equal(original.Name, copy.Name);
+        }
+
+        [Fact]
+        public void DeepCopy_NullInput_ReturnsNull()
+        {
+            // Arrange
+            TestClass original = null;
+
+            // Act
+            var copy = original.DeepCopy();
+
+            // Assert
+            Assert.Null(copy);
+        }
         #region Unit test related
+
+        private class TestClass
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
 
         private static IList<double> SoftmaxNaive(IList<double> input)
         {
@@ -1049,14 +1112,13 @@ namespace Extensions.Standard.Test
         private static double ManhattanDistanceDebug(IEnumerable<double> source, IEnumerable<double> other)
         {
             var distance = 0.0D;
-            using (var xIter = source.GetEnumerator())
-            using (var yIter = other.GetEnumerator())
+            using var xIter = source.GetEnumerator();
+            using var yIter = other.GetEnumerator();
+            while (xIter.MoveNext() && yIter.MoveNext())
             {
-                while (xIter.MoveNext() && yIter.MoveNext())
-                {
-                    distance += Math.Abs(xIter.Current - yIter.Current);
-                }
+                distance += Math.Abs(xIter.Current - yIter.Current);
             }
+
             return distance;
         }
 
