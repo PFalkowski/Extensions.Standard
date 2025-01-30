@@ -24,7 +24,7 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="StandardInterfaces" Version="3.1.0" />
   </ItemGroup>
 
