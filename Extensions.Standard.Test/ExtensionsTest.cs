@@ -17,7 +17,6 @@ namespace Extensions.Standard.Test
         [InlineData(123)]
         [InlineData(99999)]
         [InlineData(0)]
-        [InlineData(-0)]
         [InlineData(-1)]
         [InlineData(-2)]
         [InlineData(-123)]
@@ -270,6 +269,9 @@ namespace Extensions.Standard.Test
             Assert.Equal(Math.Round(max, Precision), Math.Round(received, Precision));
         }
 
+        // The following tests exercise the deprecated InClosedRange/InOpenRange shims
+        // to verify their (misleading but unchanged) behavior is preserved for consumers.
+#pragma warning disable CS0618
         [Fact]
         public void InOpenRangeTest()
         {
@@ -347,6 +349,7 @@ namespace Extensions.Standard.Test
             Assert.False(123123.InClosedRange(rangeMin, rangeMax));
             Assert.False((-123).InClosedRange(rangeMin, rangeMax));
         }
+#pragma warning restore CS0618
 
         [Fact]
         public void MaxIndexFindsIndexOfBiggestElement()
@@ -614,12 +617,12 @@ namespace Extensions.Standard.Test
         public void LineConstruction()
         {
             var start = new double[] { 0, 0 };
-            var testedLine = Utilities.ConstructLine(start, 10, 0);
+            var testedLine = Utilities.ConstructLineFromRadians(start, 10, 0);
 
             Assert.True(testedLine[0] == 0 && testedLine[1] == 0 && testedLine[2] == 10 && testedLine[3] == 0,
                 $"wrong points: ({testedLine[0]},{testedLine[1]} {testedLine[2]},{testedLine[3]}), should be (0,0 10,0)");
 
-            testedLine = Utilities.ConstructLine(start, 10, 45);
+            testedLine = Utilities.ConstructLineFromRadians(start, 10, 45);
 
             Assert.True(testedLine[0] == 0 && testedLine[1] == 0 && testedLine[2] > 5.253 && testedLine[2] < 5.254 && testedLine[3] > 8.509 && testedLine[3] < 8.51,
                 $"wrong points: ({testedLine[0]},{testedLine[1]} {testedLine[2]},{testedLine[3]}), should be (0,0 5.253,8.509)");
@@ -844,8 +847,8 @@ namespace Extensions.Standard.Test
             var result = blahblah.Partition(ratio);
             Assert.Single(result[0]);
             Assert.Single(result[1]);
-            Assert.Equal(result[0].First(), item1);
-            Assert.Equal(result[1].First(), item2);
+            Assert.Equal(item1, result[0].First());
+            Assert.Equal(item2, result[1].First());
         }
 
         [Fact]
@@ -860,9 +863,9 @@ namespace Extensions.Standard.Test
             var result = blahblah.Partition(ratio);
             Assert.Equal(2, result[0].Count);
             Assert.Single(result[1]);
-            Assert.Equal(result[0][0], item1);
-            Assert.Equal(result[0][1], item2);
-            Assert.Equal(result[1][0], item3);
+            Assert.Equal(item1, result[0][0]);
+            Assert.Equal(item2, result[0][1]);
+            Assert.Equal(item3, result[1][0]);
         }
 
         [Fact]
@@ -965,7 +968,9 @@ namespace Extensions.Standard.Test
 
         private class PoCo
         {
+#pragma warning disable CS0414 // present only to assert private fields are excluded from the result
             private string test = "DoNotShowThis";
+#pragma warning restore CS0414
             private string test2 { get; set; } = "DoNotShowThis";
             public int TestInt { get; } = 10;
             public string TestString { get; set; } = "20";
@@ -1090,6 +1095,110 @@ namespace Extensions.Standard.Test
             // Assert
             Assert.Null(copy);
         }
+
+        [Fact]
+        public void IsEquivalentDetectsMismatchNotOnlyInLastElement()
+        {
+            // Regression: a non-final differing element used to be ignored.
+            Assert.False(new[] { "3", "1", "2" }.IsEquivalent(new[] { "4", "1", "2" }));
+        }
+
+        [Theory]
+        [InlineData(new[] { "a", "a", "b" }, new[] { "b", "a", "a" }, true)]
+        [InlineData(new[] { "a", "a", "b" }, new[] { "a", "b", "b" }, false)]
+        [InlineData(new[] { "1", "2", "3" }, new[] { "1", "2", "3", "3" }, false)]
+        public void IsEquivalentRespectsMultiplicity(IEnumerable<string> lhs, IEnumerable<string> rhs, bool expected)
+        {
+            Assert.Equal(expected, lhs.IsEquivalent(rhs));
+        }
+
+        [Fact]
+        public void AsMemoryFormatsHighBinaryOrders()
+        {
+            Assert.Equal("1 " + Constants.TebibyteSuffix, Constants.TiB.AsMemory());
+            Assert.Equal("1 " + Constants.PebibyteSuffix, Constants.PiB.AsMemory());
+            Assert.Equal("1 " + Constants.ExbibyteSuffix, Constants.EiB.AsMemory());
+            Assert.Equal("1 " + Constants.ZebibyteSuffix, Constants.ZiB.AsMemory());
+            Assert.Equal("1 " + Constants.YobibyteSuffix, Constants.YiB.AsMemory());
+        }
+
+        [Fact]
+        public void AsMemoryDecimalFormatsHighDecimalOrders()
+        {
+            Assert.Equal("1 " + Constants.TerabyteSuffix, Constants.Tera.AsMemoryDecimal());
+            Assert.Equal("1 " + Constants.PetabyteSuffix, Constants.Peta.AsMemoryDecimal());
+            Assert.Equal("1 " + Constants.ExabyteSuffix, Constants.Exa.AsMemoryDecimal());
+            Assert.Equal("1 " + Constants.ZettabyteSuffix, Constants.Zetta.AsMemoryDecimal());
+            Assert.Equal("1 " + Constants.YottabyteSuffix, Constants.Yotta.AsMemoryDecimal());
+        }
+
+        [Fact]
+        public void ScaleGenericNonDoubleSequenceScalesWithoutThrowing()
+        {
+            // Regression: Cast<double>() on boxed ints threw InvalidCastException.
+            var received = new[] { 0, 5, 10 }.Scale((0.0, 1.0)).ToList();
+            Assert.Equal(0.0, received[0], Precision);
+            Assert.Equal(0.5, received[1], Precision);
+            Assert.Equal(1.0, received[2], Precision);
+        }
+
+        [Theory]
+        [InlineData(10, 20, 30, 255)]
+        [InlineData(0, 0, 0, 0)]
+        [InlineData(255, 255, 255, 255)]
+        [InlineData(1, 2, 3, 4)]
+        public void AsColorRoundTripsThroughArgb(byte red, byte green, byte blue, byte alpha)
+        {
+            var unpacked = Utilities.AsColor(red, green, blue, alpha).AsColor();
+            Assert.Equal(alpha, unpacked[0]);
+            Assert.Equal(red, unpacked[1]);
+            Assert.Equal(green, unpacked[2]);
+            Assert.Equal(blue, unpacked[3]);
+        }
+
+        [Fact]
+        public void InRangeInclusiveIncludesEndpoints()
+        {
+            Assert.True(0.InRangeInclusive(0, 10));
+            Assert.True(10.InRangeInclusive(0, 10));
+            Assert.True(5.InRangeInclusive(0, 10));
+            Assert.False((-1).InRangeInclusive(0, 10));
+            Assert.False(11.InRangeInclusive(0, 10));
+        }
+
+        [Fact]
+        public void InRangeExclusiveExcludesEndpoints()
+        {
+            Assert.False(0.InRangeExclusive(0, 10));
+            Assert.False(10.InRangeExclusive(0, 10));
+            Assert.True(5.InRangeExclusive(0, 10));
+            Assert.False((-1).InRangeExclusive(0, 10));
+            Assert.False(11.InRangeExclusive(0, 10));
+        }
+
+        [Fact]
+        public void ConstructLineFromDegreesConvertsAngle()
+        {
+            var start = new double[] { 0, 0 };
+            var line = Utilities.ConstructLineFromDegrees(start, 10, 45);
+
+            Assert.Equal(0, line[0]);
+            Assert.Equal(0, line[1]);
+            Assert.True(line[2] > 7.07 && line[2] < 7.072, $"x2 was {line[2]}, expected ~7.071");
+            Assert.True(line[3] > 7.07 && line[3] < 7.072, $"y2 was {line[3]}, expected ~7.071");
+        }
+
+        [Fact]
+        public void ObsoleteConstructLineStillBehavesLikeRadiansVariant()
+        {
+            var start = new double[] { 0, 0 };
+#pragma warning disable CS0618
+            var legacy = Utilities.ConstructLine(start, 10, 1.2);
+#pragma warning restore CS0618
+            var current = Utilities.ConstructLineFromRadians(start, 10, 1.2);
+            Assert.Equal(current, legacy);
+        }
+
         #region Unit test related
 
         private class TestClass

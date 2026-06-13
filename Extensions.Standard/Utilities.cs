@@ -48,15 +48,32 @@ namespace Extensions.Standard
             return degrees / (180.0 / Math.PI);
         }
 
-        public static double[] ConstructLine(double[] startingPointXy, double length, double angleDegrees)
+        /// <summary>
+        ///     Constructs a line segment [x1, y1, x2, y2] from a starting point, length and angle in radians.
+        /// </summary>
+        public static double[] ConstructLineFromRadians(double[] startingPointXy, double length, double angleRadians)
         {
             return new[]
             {
                 startingPointXy[0],
                 startingPointXy[1],
-                startingPointXy[0] + length * Math.Cos(angleDegrees),
-                startingPointXy[1] + length * Math.Sin(angleDegrees)
+                startingPointXy[0] + length * Math.Cos(angleRadians),
+                startingPointXy[1] + length * Math.Sin(angleRadians)
             };
+        }
+
+        /// <summary>
+        ///     Constructs a line segment [x1, y1, x2, y2] from a starting point, length and angle in degrees.
+        /// </summary>
+        public static double[] ConstructLineFromDegrees(double[] startingPointXy, double length, double angleDegrees)
+        {
+            return ConstructLineFromRadians(startingPointXy, length, angleDegrees.ToRadians());
+        }
+
+        [Obsolete("The angle is interpreted as radians despite the parameter name. Use ConstructLineFromRadians (identical behavior) or ConstructLineFromDegrees. Will be removed in a future major version.")]
+        public static double[] ConstructLine(double[] startingPointXy, double length, double angleDegrees)
+        {
+            return ConstructLineFromRadians(startingPointXy, length, angleDegrees);
         }
 
         public static double Interpolate(double[] p1, double[] p2, double x)
@@ -85,11 +102,29 @@ namespace Extensions.Standard
 
         #region Distance Measures
 
+        /// <summary>
+        ///     Returns true when <paramref name="value"/> lies within the closed interval [from, to] (endpoints included).
+        /// </summary>
+        public static bool InRangeInclusive<T>(this T value, T from, T to) where T : IComparable<T>
+        {
+            return value.CompareTo(@from) >= 0 && value.CompareTo(to) <= 0;
+        }
+
+        /// <summary>
+        ///     Returns true when <paramref name="value"/> lies within the open interval (from, to) (endpoints excluded).
+        /// </summary>
+        public static bool InRangeExclusive<T>(this T value, T from, T to) where T : IComparable<T>
+        {
+            return value.CompareTo(@from) > 0 && value.CompareTo(to) < 0;
+        }
+
+        [Obsolete("Misleading name: this excludes the endpoints (open interval). Use InRangeExclusive instead. Will be removed in a future major version.")]
         public static bool InClosedRange<T>(this T value, T from, T to) where T : IComparable<T>
         {
             return value.CompareTo(@from) > 0 && value.CompareTo(to) < 0;
         }
 
+        [Obsolete("Misleading name: this includes the endpoints (closed interval). Use InRangeInclusive instead. Will be removed in a future major version.")]
         public static bool InOpenRange<T>(this T value, T from, T to) where T : IComparable<T>
         {
             return value.CompareTo(@from) >= 0 && value.CompareTo(to) <= 0;
@@ -210,6 +245,13 @@ namespace Extensions.Standard
             return result;
         }
 
+#if NET6_0_OR_GREATER
+        private static Random SharedRandom => Random.Shared;
+#else
+        [ThreadStatic] private static Random _threadStaticRandom;
+        private static Random SharedRandom => _threadStaticRandom ??= new Random();
+#endif
+
         /// <summary>
         ///     Performs in-place Knuth Shuffle - reorder items randomly in-place, with Fisher-Yates algorithm.
         ///     O(n) complexity. see: http://rosettacode.org/wiki/Knuth_shuffle#C.23
@@ -220,7 +262,7 @@ namespace Extensions.Standard
         /// <returns></returns>
         public static void Shuffle<T>(this IList<T> input, Random rand = null)
         {
-            rand ??= Random.Shared;
+            rand ??= SharedRandom;
             for (var i = 0; i < input.Count; ++i)
             {
                 var j = rand.Next(i, input.Count);
@@ -323,30 +365,36 @@ namespace Extensions.Standard
         /// <returns></returns>
         public static bool IsEquivalent<T>(this IEnumerable<T> collectionLhs, IEnumerable<T> collectionRhs)
         {
-            var result = true;
-            if (collectionLhs == null && collectionRhs == null)
+            if (collectionLhs == null && collectionRhs == null) return true;
+            if (collectionLhs == null || collectionRhs == null) return false;
+
+            // Multiset (bag) equality: same elements with the same multiplicity, order independent.
+            var counts = new Dictionary<T, int>();
+            var nullCount = 0;
+            foreach (var item in collectionLhs)
             {
-                return true;
+                if (item == null) { ++nullCount; continue; }
+                counts.TryGetValue(item, out var current);
+                counts[item] = current + 1;
             }
 
-            if (collectionLhs == null || collectionRhs == null)
+            foreach (var item in collectionRhs)
             {
-                return false;
-            }
-            var listA = collectionLhs as IList<T> ?? collectionLhs.ToList();
-            var listB = collectionRhs as HashSet<T> ?? collectionRhs.ToHashSet();
-
-            if (listA.Count != listB.Count)
-            {
-                return false;
-            }
-
-            foreach (var listAItem in listA)
-            {
-                result = listB.Contains(listAItem);
+                if (item == null)
+                {
+                    if (--nullCount < 0) return false;
+                    continue;
+                }
+                if (!counts.TryGetValue(item, out var current) || current == 0) return false;
+                counts[item] = current - 1;
             }
 
-            return result;
+            if (nullCount != 0) return false;
+            foreach (var remaining in counts.Values)
+            {
+                if (remaining != 0) return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -381,7 +429,7 @@ namespace Extensions.Standard
 
             var stb = new StringBuilder();
             stb.AppendLine();
-            stb.AppendJoin(Environment.NewLine, input.Take(n));
+            stb.Append(string.Join(Environment.NewLine, input.Take(n)));
             stb.AppendLine();
             stb.AppendLine("...");
             stb.AppendLine();
@@ -401,7 +449,7 @@ namespace Extensions.Standard
             var stb = new StringBuilder();
             stb.AppendLine();
             stb.AppendLine("...");
-            stb.AppendJoin(Environment.NewLine, input.Skip(input.Count - n));
+            stb.Append(string.Join(Environment.NewLine, input.Skip(input.Count - n)));
             stb.AppendLine();
 
             return stb.ToString();
@@ -419,10 +467,10 @@ namespace Extensions.Standard
 
             var stb = new StringBuilder();
             stb.AppendLine();
-            stb.AppendJoin(Environment.NewLine, input.Take(n));
+            stb.Append(string.Join(Environment.NewLine, input.Take(n)));
             stb.AppendLine();
             stb.AppendLine("...");
-            stb.AppendJoin(Environment.NewLine, input.Skip(input.Count - n));
+            stb.Append(string.Join(Environment.NewLine, input.Skip(input.Count - n)));
             stb.AppendLine();
 
             return stb.ToString();
@@ -449,7 +497,7 @@ namespace Extensions.Standard
         /// <returns></returns>
         public static int AsColor(byte red, byte green, byte blue, byte alpha = 255)
         {
-            return alpha + (red << 8) + (green << 16) + (blue << 24);
+            return (alpha << 24) | (red << 16) | (green << 8) | blue;
         }
 
         /// <summary>
@@ -518,39 +566,7 @@ namespace Extensions.Standard
             CultureInfo culture = null)
             where T : IConvertible
         {
-            var bytesConverted = Convert.ToDecimal(bytes);
-            var numberFormat = (NumberFormatInfo)(culture?.NumberFormat ?? CultureInfo.InvariantCulture.NumberFormat).Clone();
-            if (numberSeparator != null) numberFormat.NumberGroupSeparator = numberSeparator;
-
-            if (bytesConverted < Constants.KiB)
-            {
-                return $"{bytesConverted.ToString(numberFormat)} {"byte".PluralizeWhenNeeded(bytesConverted)}";
-            }
-            if (bytesConverted < Constants.MiB)
-            {
-                return $"{Math.Round(bytesConverted / Constants.KiB, decimals).ToString(numberFormat)} {Constants.KibibyteSuffix}";
-            }
-            if (bytesConverted < Constants.GiB)
-            {
-                return $"{Math.Round(bytesConverted / Constants.MiB, decimals).ToString(numberFormat)} {Constants.MebibyteSuffix}";
-            }
-            if (bytesConverted < Constants.TiB)
-            {
-                return $"{Math.Round(bytesConverted / Constants.GiB, decimals).ToString(numberFormat)} {Constants.GibibyteSuffix}";
-            }
-            if (bytesConverted < Constants.PiB)
-            {
-                return $"{Math.Round(bytesConverted / Constants.TiB, decimals).ToString(numberFormat)} {Constants.TebibyteSuffix}";
-            }
-            if (bytesConverted < Constants.EiB)
-            {
-                return $"{Math.Round(bytesConverted / Constants.PiB, decimals).ToString(numberFormat)} {Constants.PebibyteSuffix}";
-            }
-            if (bytesConverted < Constants.ZiB)
-            {
-                return $"{Math.Round(bytesConverted / Constants.YiB, decimals).ToString(numberFormat)} {Constants.ExbibyteSuffix}";
-            }
-            return $"{Math.Round(bytesConverted / Constants.ZiB, decimals).ToString(numberFormat)} {Constants.YobibyteSuffix}";
+            return FormatMagnitude(Convert.ToDecimal(bytes), Constants.BinaryOrders, decimals, numberSeparator, culture);
         }
 
         /// <summary>
@@ -565,39 +581,33 @@ namespace Extensions.Standard
             CultureInfo culture = null)
             where T : IConvertible
         {
-            var bytesConverted = Convert.ToDecimal(bytes);
+            return FormatMagnitude(Convert.ToDecimal(bytes), Constants.DecimalOrders, decimals, numberSeparator, culture);
+        }
+
+        /// <summary>
+        ///     Renders <paramref name="value"/> using the largest order of magnitude in <paramref name="orders"/>
+        ///     that does not exceed it. The first entry in <paramref name="orders"/> is treated as the base unit
+        ///     ("byte") and is pluralized rather than scaled.
+        /// </summary>
+        private static string FormatMagnitude(decimal value, Tuple<string, decimal>[] orders, byte decimals,
+            string numberSeparator, CultureInfo culture)
+        {
             var numberFormat = (NumberFormatInfo)(culture?.NumberFormat ?? CultureInfo.InvariantCulture.NumberFormat).Clone();
             if (numberSeparator != null) numberFormat.NumberGroupSeparator = numberSeparator;
 
-            if (bytesConverted < Constants.Kilo)
+            var orderIndex = 0;
+            for (var i = 1; i < orders.Length; ++i)
             {
-                return $"{bytesConverted.ToString(numberFormat)} {"byte".PluralizeWhenNeeded(bytesConverted)}";
+                if (value < orders[i].Item2) break;
+                orderIndex = i;
             }
-            if (bytesConverted < Constants.Mega)
+
+            var (suffix, multiplier) = (orders[orderIndex].Item1, orders[orderIndex].Item2);
+            if (orderIndex == 0)
             {
-                return $"{Math.Round(bytesConverted / Constants.Kilo, decimals).ToString(numberFormat)} {Constants.KilobyteSuffix}";
+                return $"{value.ToString(numberFormat)} {suffix.PluralizeWhenNeeded(value)}";
             }
-            if (bytesConverted < Constants.Giga)
-            {
-                return $"{Math.Round(bytesConverted / Constants.Mega, decimals).ToString(numberFormat)} {Constants.MegabyteSuffix}";
-            }
-            if (bytesConverted < Constants.Tera)
-            {
-                return $"{Math.Round(bytesConverted / Constants.Giga, decimals).ToString(numberFormat)} {Constants.GigabyteSuffix}";
-            }
-            if (bytesConverted < Constants.Peta)
-            {
-                return $"{Math.Round(bytesConverted / Constants.Tera, decimals).ToString(numberFormat)} {Constants.TerabyteSuffix}";
-            }
-            if (bytesConverted < Constants.Exa)
-            {
-                return $"{Math.Round(bytesConverted / Constants.Peta, decimals).ToString(numberFormat)} {Constants.PetabyteSuffix}";
-            }
-            if (bytesConverted < Constants.Zetta)
-            {
-                return $"{Math.Round(bytesConverted / Constants.Exa, decimals).ToString(numberFormat)} {Constants.ZettabyteSuffix}";
-            }
-            return $"{Math.Round(bytesConverted / Constants.Zetta, decimals).ToString(numberFormat)} {Constants.YobibyteSuffix}";
+            return $"{Math.Round(value / multiplier, decimals).ToString(numberFormat)} {suffix}";
         }
 
         /// <summary>
@@ -748,7 +758,7 @@ namespace Extensions.Standard
         {
             if (scale.Min > scale.Max) throw new ArgumentOutOfRangeException(nameof(scale.Min));
             var tmp = value * (scale.Max - scale.Min);
-            if (double.IsInfinity(tmp) && value.InClosedRange(0.0, 1.0))
+            if (double.IsInfinity(tmp) && value.InRangeExclusive(0.0, 1.0))
             {
                 return value.ScaleSafe(scale.Min, scale.Max);
             }
@@ -777,7 +787,7 @@ namespace Extensions.Standard
         public static IEnumerable<double> Scale(this IEnumerable<double> data, (double Min, double Max) scale)
         {
             var enumerated = data as double[] ?? data.ToArray();
-            var (min, max) = data.FindMinMaxInOn();
+            var (min, max) = enumerated.FindMinMaxInOn();
             var m = (scale.Max - scale.Min) / (max - min);
             var c = scale.Min - min * m;
             var result = new double[enumerated.Length];
@@ -797,7 +807,7 @@ namespace Extensions.Standard
         public static IEnumerable<double> Scale<T>(this IEnumerable<T> data, (double Min, double Max) scale) where T : IConvertible
         {
             var enumerated = data as T[] ?? data.ToArray();
-            var (min, max) = enumerated.Cast<double>().FindMinMaxInOn();
+            var (min, max) = enumerated.Select(x => Convert.ToDouble(x)).FindMinMaxInOn();
             var m = (scale.Max - scale.Min) / (max - min);
             var c = scale.Min - min * m;
             var result = new double[enumerated.Length];
