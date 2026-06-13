@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using Xunit;
 using NSubstitute;
-using Newtonsoft.Json;
 
 namespace Extensions.Standard.Test
 {
@@ -1065,22 +1064,75 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
-        public void DeepCopy_CustomSettings_HandlesCustomSerialization()
+        public void DeepCopy_NestedReferenceAndCollection_AreClonedNotShared()
         {
-            // Arrange
-            var original = new TestClass { Id = 1, Name = "Test" };
-            var settings = new JsonSerializerSettings
+            var original = new Container
             {
-                NullValueHandling = NullValueHandling.Ignore
+                A = new TestClass { Id = 1, Name = "x" },
+                Numbers = new List<int> { 1, 2, 3 }
             };
 
-            // Act
-            var copy = original.DeepCopy(settings);
+            var copy = original.DeepCopy();
 
-            // Assert
+            Assert.NotSame(original.A, copy.A);
+            Assert.Equal("x", copy.A.Name);
+            Assert.NotSame(original.Numbers, copy.Numbers);
+
+            copy.Numbers.Add(4);
+            copy.A.Name = "changed";
+            Assert.Equal(3, original.Numbers.Count);     // original list untouched
+            Assert.Equal("x", original.A.Name);          // original nested object untouched
+        }
+
+        [Fact]
+        public void DeepCopy_CopiesPrivateFields()
+        {
+            var original = new WithPrivateField(42);
+
+            var copy = original.DeepCopy();
+
             Assert.NotSame(original, copy);
-            Assert.Equal(original.Id, copy.Id);
-            Assert.Equal(original.Name, copy.Name);
+            Assert.Equal(42, copy.Secret);
+        }
+
+        [Fact]
+        public void DeepCopy_PreservesSharedReferenceIdentity()
+        {
+            var shared = new TestClass { Id = 7, Name = "shared" };
+            var original = new Container { A = shared, B = shared };
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(shared, copy.A);
+            Assert.Same(copy.A, copy.B);   // one object shared by two fields stays a single object
+        }
+
+        [Fact]
+        public void DeepCopy_HandlesReferenceCycles()
+        {
+            var a = new Node { Value = 1 };
+            var b = new Node { Value = 2 };
+            a.Next = b;
+            b.Next = a;   // cycle
+
+            var copy = a.DeepCopy();
+
+            Assert.NotSame(a, copy);
+            Assert.Equal(1, copy.Value);
+            Assert.Equal(2, copy.Next.Value);
+            Assert.Same(copy, copy.Next.Next);   // cycle preserved, not infinitely expanded
+        }
+
+        [Fact]
+        public void DeepCopy_Array_IsDeepCloned()
+        {
+            var original = new[] { new TestClass { Id = 1, Name = "a" }, new TestClass { Id = 2, Name = "b" } };
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.NotSame(original[0], copy[0]);
+            Assert.Equal("b", copy[1].Name);
         }
 
         [Fact]
@@ -1094,6 +1146,169 @@ namespace Extensions.Standard.Test
 
             // Assert
             Assert.Null(copy);
+        }
+
+        [Fact]
+        public void DeepCopy_ValueTypesAndImmutables_ReturnEqualValues()
+        {
+            Assert.Equal(42, 42.DeepCopy());
+            Assert.Equal("hello", "hello".DeepCopy());
+            Assert.Equal(3.14m, 3.14m.DeepCopy());
+            Assert.Equal(DayOfWeek.Monday, DayOfWeek.Monday.DeepCopy());
+            var dt = new DateTime(2026, 6, 13);
+            Assert.Equal(dt, dt.DeepCopy());
+            var g = Guid.NewGuid();
+            Assert.Equal(g, g.DeepCopy());
+        }
+
+        [Fact]
+        public void DeepCopy_Nullable_PreservesValueAndNull()
+        {
+            int? hasValue = 5;
+            int? noValue = null;
+            Assert.Equal(5, hasValue.DeepCopy());
+            Assert.Null(noValue.DeepCopy());
+        }
+
+        [Fact]
+        public void DeepCopy_CopiesInheritedPrivateFields()
+        {
+            var original = new DerivedWithValue(7, 9);
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.Equal(7, copy.BaseSecret);
+            Assert.Equal(9, copy.Derived);
+        }
+
+        [Fact]
+        public void DeepCopy_StructWithReferenceField_IsDeepCloned()
+        {
+            var holder = new Holder { Inner = new TestClass { Id = 1, Name = "x" } };
+
+            var copy = holder.DeepCopy();
+
+            Assert.NotSame(holder.Inner, copy.Inner);
+            copy.Inner.Name = "y";
+            Assert.Equal("x", holder.Inner.Name);
+        }
+
+        [Fact]
+        public void DeepCopy_Delegate_IsCopiedByReference()
+        {
+            Action callback = () => { };
+            var original = new WithDelegate { Value = 5, Callback = callback };
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.Equal(5, copy.Value);
+            Assert.Same(callback, copy.Callback);
+        }
+
+        [Fact]
+        public void DeepCopy_PrimitiveArray_IsIndependentCopy()
+        {
+            var original = new[] { 1, 2, 3 };
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.Equal(original, copy);
+            copy[0] = 99;
+            Assert.Equal(1, original[0]);
+        }
+
+        [Fact]
+        public void DeepCopy_EmptyArrayAndList_AreClonedEmpty()
+        {
+            var arr = new int[0];
+            var arrCopy = arr.DeepCopy();
+            Assert.NotSame(arr, arrCopy);
+            Assert.Empty(arrCopy);
+
+            var list = new List<int>();
+            var listCopy = list.DeepCopy();
+            Assert.NotSame(list, listCopy);
+            Assert.Empty(listCopy);
+        }
+
+        [Fact]
+        public void DeepCopy_TwoDimensionalPrimitiveArray_IsIndependentCopy()
+        {
+            var grid = new[,] { { 1, 2 }, { 3, 4 } };
+
+            var copy = grid.DeepCopy();
+
+            Assert.NotSame(grid, copy);
+            Assert.Equal(2, copy.GetLength(0));
+            Assert.Equal(2, copy.GetLength(1));
+            Assert.Equal(4, copy[1, 1]);
+            copy[0, 0] = 99;
+            Assert.Equal(1, grid[0, 0]);
+        }
+
+        [Fact]
+        public void DeepCopy_TwoDimensionalReferenceArray_DeepClonesElements()
+        {
+            var grid = new[,] { { new TestClass { Name = "a" }, new TestClass { Name = "b" } } };
+
+            var copy = grid.DeepCopy();
+
+            Assert.NotSame(grid[0, 0], copy[0, 0]);
+            Assert.Equal("a", copy[0, 0].Name);
+            Assert.Equal("b", copy[0, 1].Name);
+        }
+
+        [Fact]
+        public void DeepCopy_JaggedArray_IsDeepCloned()
+        {
+            var jagged = new[] { new[] { 1, 2 }, new[] { 3 } };
+
+            var copy = jagged.DeepCopy();
+
+            Assert.NotSame(jagged[0], copy[0]);
+            copy[0][0] = 99;
+            Assert.Equal(1, jagged[0][0]);
+        }
+
+        [Fact]
+        public void DeepCopy_Dictionary_IsDeepCloned()
+        {
+            var original = new Dictionary<string, TestClass> { ["a"] = new TestClass { Id = 1, Name = "x" } };
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.NotSame(original["a"], copy["a"]);
+            Assert.Equal("x", copy["a"].Name);
+            copy["a"].Name = "y";
+            Assert.Equal("x", original["a"].Name);
+        }
+
+        [Fact]
+        public void DeepCopy_SelfReferencingObject_PreservesSelfCycle()
+        {
+            var node = new Node { Value = 1 };
+            node.Next = node;
+
+            var copy = node.DeepCopy();
+
+            Assert.NotSame(node, copy);
+            Assert.Same(copy, copy.Next);
+        }
+
+        [Fact]
+        public void DeepCopy_SharedReferenceWithinCollection_StaysShared()
+        {
+            var shared = new TestClass { Name = "s" };
+            var list = new List<TestClass> { shared, shared };
+
+            var copy = list.DeepCopy();
+
+            Assert.NotSame(shared, copy[0]);
+            Assert.Same(copy[0], copy[1]);
         }
 
         [Fact]
@@ -1205,6 +1420,50 @@ namespace Extensions.Standard.Test
         {
             public int Id { get; set; }
             public string Name { get; set; }
+        }
+
+        private class Container
+        {
+            public TestClass A { get; set; }
+            public TestClass B { get; set; }
+            public List<int> Numbers { get; set; }
+        }
+
+        private class WithPrivateField
+        {
+            private readonly int _secret;
+            public WithPrivateField(int secret) => _secret = secret;
+            public int Secret => _secret;
+        }
+
+        private class Node
+        {
+            public int Value { get; set; }
+            public Node Next { get; set; }
+        }
+
+        private struct Holder
+        {
+            public TestClass Inner { get; set; }
+        }
+
+        private class BaseWithPrivate
+        {
+            private readonly int _baseSecret;
+            public BaseWithPrivate(int baseSecret) => _baseSecret = baseSecret;
+            public int BaseSecret => _baseSecret;
+        }
+
+        private class DerivedWithValue : BaseWithPrivate
+        {
+            public DerivedWithValue(int baseSecret, int derived) : base(baseSecret) => Derived = derived;
+            public int Derived { get; set; }
+        }
+
+        private class WithDelegate
+        {
+            public int Value { get; set; }
+            public Action Callback { get; set; }
         }
 
         private static IList<double> SoftmaxNaive(IList<double> input)

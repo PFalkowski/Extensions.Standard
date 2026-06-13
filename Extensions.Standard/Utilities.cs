@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace Extensions.Standard
 {
@@ -862,11 +861,147 @@ namespace Extensions.Standard
             return properties;
         }
 
-        public static T DeepCopy<T>(this T original, JsonSerializerSettings settings = null)
+        /// <summary>
+        ///     Creates a deep copy of <paramref name="original"/> by recursively cloning every instance field
+        ///     (including private and inherited ones). Shared references and reference cycles are preserved, and
+        ///     types do not need to be serializable or expose a parameterless constructor.
+        /// </summary>
+        /// <remarks>
+        ///     Strings and other immutable framework types are reused as-is. Delegates and <see cref="Type"/>
+        ///     instances are copied by reference (deep-cloning them is meaningless). Pointer fields are skipped.
+        /// </remarks>
+        public static T DeepCopy<T>(this T original)
         {
-            return settings == null 
-                ? JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(original)) 
-                : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(original, settings), settings);
+            if (original is null) return default;
+            return (T)DeepCopyObject(original, new Dictionary<object, object>(ReferenceComparer.Instance));
+        }
+
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, FieldInfo[]> _fieldCache =
+            new System.Collections.Concurrent.ConcurrentDictionary<Type, FieldInfo[]>();
+
+        private static object DeepCopyObject(object original, Dictionary<object, object> visited)
+        {
+            if (original is null) return null;
+
+            var type = original.GetType();
+
+            if (IsCopiedByValue(type) || original is Type || original is Delegate)
+            {
+                return original;
+            }
+
+            if (visited.TryGetValue(original, out var alreadyCloned))
+            {
+                return alreadyCloned;
+            }
+
+            if (type.IsArray)
+            {
+                return DeepCopyArray((Array)original, type, visited);
+            }
+
+            var clone = GetUninitializedObject(type);
+            visited[original] = clone;
+
+            for (var current = type; current != null && current != typeof(object); current = current.BaseType)
+            {
+                foreach (var field in GetCopyableFields(current))
+                {
+                    var value = field.GetValue(original);
+                    field.SetValue(clone, DeepCopyObject(value, visited));
+                }
+            }
+
+            return clone;
+        }
+
+        private static object DeepCopyArray(Array source, Type arrayType, Dictionary<object, object> visited)
+        {
+            var elementType = arrayType.GetElementType();
+            var lengths = new int[source.Rank];
+            var lowerBounds = new int[source.Rank];
+            for (var d = 0; d < source.Rank; ++d)
+            {
+                lengths[d] = source.GetLength(d);
+                lowerBounds[d] = source.GetLowerBound(d);
+            }
+
+            var clone = Array.CreateInstance(elementType, lengths, lowerBounds);
+            visited[source] = clone;
+
+            if (IsCopiedByValue(elementType))
+            {
+                Array.Copy(source, clone, source.Length);
+            }
+            else
+            {
+                foreach (var indices in EnumerateIndices(source))
+                {
+                    clone.SetValue(DeepCopyObject(source.GetValue(indices), visited), indices);
+                }
+            }
+
+            return clone;
+        }
+
+        private static IEnumerable<int[]> EnumerateIndices(Array array)
+        {
+            if (array.Length == 0) yield break;
+
+            var rank = array.Rank;
+            var indices = new int[rank];
+            for (var d = 0; d < rank; ++d) indices[d] = array.GetLowerBound(d);
+
+            while (true)
+            {
+                yield return (int[])indices.Clone();
+
+                var dim = rank - 1;
+                while (dim >= 0)
+                {
+                    if (++indices[dim] <= array.GetUpperBound(dim)) break;
+                    indices[dim] = array.GetLowerBound(dim);
+                    --dim;
+                }
+                if (dim < 0) yield break;
+            }
+        }
+
+        private static FieldInfo[] GetCopyableFields(Type type)
+        {
+            return _fieldCache.GetOrAdd(type, t => t
+                .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+                .Where(f => !f.FieldType.IsPointer)
+                .ToArray());
+        }
+
+        private static bool IsCopiedByValue(Type type)
+        {
+            if (type.IsPrimitive || type.IsEnum) return true;
+            return type == typeof(string)
+                || type == typeof(decimal)
+                || type == typeof(DateTime)
+                || type == typeof(DateTimeOffset)
+                || type == typeof(TimeSpan)
+                || type == typeof(Guid)
+                || type == typeof(IntPtr)
+                || type == typeof(UIntPtr);
+        }
+
+        private static object GetUninitializedObject(Type type)
+        {
+#if NET8_0_OR_GREATER
+            return System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+#else
+            return System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
+#endif
+        }
+
+        private sealed class ReferenceComparer : IEqualityComparer<object>
+        {
+            public static readonly ReferenceComparer Instance = new ReferenceComparer();
+            bool IEqualityComparer<object>.Equals(object x, object y) => ReferenceEquals(x, y);
+            public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
         }
         #endregion
     }

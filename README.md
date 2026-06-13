@@ -21,6 +21,7 @@ Lightweight extensions methods (and constants) for common programming tasks, lik
 - HsVtoArgb
 - Scale
 - Fit
+- DeepCopy (reflection-based deep clone, no dependencies)
 
 and many more.
 
