@@ -48,15 +48,32 @@ namespace Extensions.Standard
             return degrees / (180.0 / Math.PI);
         }
 
-        public static double[] ConstructLine(double[] startingPointXy, double length, double angleDegrees)
+        /// <summary>
+        ///     Constructs a line segment [x1, y1, x2, y2] from a starting point, length and angle in radians.
+        /// </summary>
+        public static double[] ConstructLineFromRadians(double[] startingPointXy, double length, double angleRadians)
         {
             return new[]
             {
                 startingPointXy[0],
                 startingPointXy[1],
-                startingPointXy[0] + length * Math.Cos(angleDegrees),
-                startingPointXy[1] + length * Math.Sin(angleDegrees)
+                startingPointXy[0] + length * Math.Cos(angleRadians),
+                startingPointXy[1] + length * Math.Sin(angleRadians)
             };
+        }
+
+        /// <summary>
+        ///     Constructs a line segment [x1, y1, x2, y2] from a starting point, length and angle in degrees.
+        /// </summary>
+        public static double[] ConstructLineFromDegrees(double[] startingPointXy, double length, double angleDegrees)
+        {
+            return ConstructLineFromRadians(startingPointXy, length, angleDegrees.ToRadians());
+        }
+
+        [Obsolete("The angle is interpreted as radians despite the parameter name. Use ConstructLineFromRadians (identical behavior) or ConstructLineFromDegrees. Will be removed in a future major version.")]
+        public static double[] ConstructLine(double[] startingPointXy, double length, double angleDegrees)
+        {
+            return ConstructLineFromRadians(startingPointXy, length, angleDegrees);
         }
 
         public static double Interpolate(double[] p1, double[] p2, double x)
@@ -85,11 +102,29 @@ namespace Extensions.Standard
 
         #region Distance Measures
 
+        /// <summary>
+        ///     Returns true when <paramref name="value"/> lies within the closed interval [from, to] (endpoints included).
+        /// </summary>
+        public static bool InRangeInclusive<T>(this T value, T from, T to) where T : IComparable<T>
+        {
+            return value.CompareTo(@from) >= 0 && value.CompareTo(to) <= 0;
+        }
+
+        /// <summary>
+        ///     Returns true when <paramref name="value"/> lies within the open interval (from, to) (endpoints excluded).
+        /// </summary>
+        public static bool InRangeExclusive<T>(this T value, T from, T to) where T : IComparable<T>
+        {
+            return value.CompareTo(@from) > 0 && value.CompareTo(to) < 0;
+        }
+
+        [Obsolete("Misleading name: this excludes the endpoints (open interval). Use InRangeExclusive instead. Will be removed in a future major version.")]
         public static bool InClosedRange<T>(this T value, T from, T to) where T : IComparable<T>
         {
             return value.CompareTo(@from) > 0 && value.CompareTo(to) < 0;
         }
 
+        [Obsolete("Misleading name: this includes the endpoints (closed interval). Use InRangeInclusive instead. Will be removed in a future major version.")]
         public static bool InOpenRange<T>(this T value, T from, T to) where T : IComparable<T>
         {
             return value.CompareTo(@from) >= 0 && value.CompareTo(to) <= 0;
@@ -723,7 +758,7 @@ namespace Extensions.Standard
         {
             if (scale.Min > scale.Max) throw new ArgumentOutOfRangeException(nameof(scale.Min));
             var tmp = value * (scale.Max - scale.Min);
-            if (double.IsInfinity(tmp) && value.InClosedRange(0.0, 1.0))
+            if (double.IsInfinity(tmp) && value.InRangeExclusive(0.0, 1.0))
             {
                 return value.ScaleSafe(scale.Min, scale.Max);
             }

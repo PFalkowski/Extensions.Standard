@@ -14,7 +14,7 @@ Lightweight extensions methods (and constants) for common programming tasks, lik
 - IsPrime
 - ManhattanDistance
 - EuclideanDistance
-- InClosedRange
+- InRangeInclusive / InRangeExclusive
 - MeanSquaredError
 - EqualsWithTolerance
 - HsVtoArgb

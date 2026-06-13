@@ -269,6 +269,9 @@ namespace Extensions.Standard.Test
             Assert.Equal(Math.Round(max, Precision), Math.Round(received, Precision));
         }
 
+        // The following tests exercise the deprecated InClosedRange/InOpenRange shims
+        // to verify their (misleading but unchanged) behavior is preserved for consumers.
+#pragma warning disable CS0618
         [Fact]
         public void InOpenRangeTest()
         {
@@ -346,6 +349,7 @@ namespace Extensions.Standard.Test
             Assert.False(123123.InClosedRange(rangeMin, rangeMax));
             Assert.False((-123).InClosedRange(rangeMin, rangeMax));
         }
+#pragma warning restore CS0618
 
         [Fact]
         public void MaxIndexFindsIndexOfBiggestElement()
@@ -613,12 +617,12 @@ namespace Extensions.Standard.Test
         public void LineConstruction()
         {
             var start = new double[] { 0, 0 };
-            var testedLine = Utilities.ConstructLine(start, 10, 0);
+            var testedLine = Utilities.ConstructLineFromRadians(start, 10, 0);
 
             Assert.True(testedLine[0] == 0 && testedLine[1] == 0 && testedLine[2] == 10 && testedLine[3] == 0,
                 $"wrong points: ({testedLine[0]},{testedLine[1]} {testedLine[2]},{testedLine[3]}), should be (0,0 10,0)");
 
-            testedLine = Utilities.ConstructLine(start, 10, 45);
+            testedLine = Utilities.ConstructLineFromRadians(start, 10, 45);
 
             Assert.True(testedLine[0] == 0 && testedLine[1] == 0 && testedLine[2] > 5.253 && testedLine[2] < 5.254 && testedLine[3] > 8.509 && testedLine[3] < 8.51,
                 $"wrong points: ({testedLine[0]},{testedLine[1]} {testedLine[2]},{testedLine[3]}), should be (0,0 5.253,8.509)");
@@ -1150,6 +1154,49 @@ namespace Extensions.Standard.Test
             Assert.Equal(red, unpacked[1]);
             Assert.Equal(green, unpacked[2]);
             Assert.Equal(blue, unpacked[3]);
+        }
+
+        [Fact]
+        public void InRangeInclusiveIncludesEndpoints()
+        {
+            Assert.True(0.InRangeInclusive(0, 10));
+            Assert.True(10.InRangeInclusive(0, 10));
+            Assert.True(5.InRangeInclusive(0, 10));
+            Assert.False((-1).InRangeInclusive(0, 10));
+            Assert.False(11.InRangeInclusive(0, 10));
+        }
+
+        [Fact]
+        public void InRangeExclusiveExcludesEndpoints()
+        {
+            Assert.False(0.InRangeExclusive(0, 10));
+            Assert.False(10.InRangeExclusive(0, 10));
+            Assert.True(5.InRangeExclusive(0, 10));
+            Assert.False((-1).InRangeExclusive(0, 10));
+            Assert.False(11.InRangeExclusive(0, 10));
+        }
+
+        [Fact]
+        public void ConstructLineFromDegreesConvertsAngle()
+        {
+            var start = new double[] { 0, 0 };
+            var line = Utilities.ConstructLineFromDegrees(start, 10, 45);
+
+            Assert.Equal(0, line[0]);
+            Assert.Equal(0, line[1]);
+            Assert.True(line[2] > 7.07 && line[2] < 7.072, $"x2 was {line[2]}, expected ~7.071");
+            Assert.True(line[3] > 7.07 && line[3] < 7.072, $"y2 was {line[3]}, expected ~7.071");
+        }
+
+        [Fact]
+        public void ObsoleteConstructLineStillBehavesLikeRadiansVariant()
+        {
+            var start = new double[] { 0, 0 };
+#pragma warning disable CS0618
+            var legacy = Utilities.ConstructLine(start, 10, 1.2);
+#pragma warning restore CS0618
+            var current = Utilities.ConstructLineFromRadians(start, 10, 1.2);
+            Assert.Equal(current, legacy);
         }
 
         #region Unit test related
