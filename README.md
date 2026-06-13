@@ -1,5 +1,6 @@
 # Extensions.Standard
 
+[![CI](https://github.com/PFalkowski/Extensions.Standard/actions/workflows/ci.yml/badge.svg)](https://github.com/PFalkowski/Extensions.Standard/actions/workflows/ci.yml)
 [![NuGet version (Extensions.Standard)](https://img.shields.io/nuget/v/Extensions.Standard.svg)](https://www.nuget.org/packages/Extensions.Standard/)
 [![Licence (Extensions.Serialization)](https://img.shields.io/github/license/mashape/apistatus.svg)](https://choosealicense.com/licenses/mit/)
 
