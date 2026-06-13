@@ -1149,6 +1149,169 @@ namespace Extensions.Standard.Test
         }
 
         [Fact]
+        public void DeepCopy_ValueTypesAndImmutables_ReturnEqualValues()
+        {
+            Assert.Equal(42, 42.DeepCopy());
+            Assert.Equal("hello", "hello".DeepCopy());
+            Assert.Equal(3.14m, 3.14m.DeepCopy());
+            Assert.Equal(DayOfWeek.Monday, DayOfWeek.Monday.DeepCopy());
+            var dt = new DateTime(2026, 6, 13);
+            Assert.Equal(dt, dt.DeepCopy());
+            var g = Guid.NewGuid();
+            Assert.Equal(g, g.DeepCopy());
+        }
+
+        [Fact]
+        public void DeepCopy_Nullable_PreservesValueAndNull()
+        {
+            int? hasValue = 5;
+            int? noValue = null;
+            Assert.Equal(5, hasValue.DeepCopy());
+            Assert.Null(noValue.DeepCopy());
+        }
+
+        [Fact]
+        public void DeepCopy_CopiesInheritedPrivateFields()
+        {
+            var original = new DerivedWithValue(7, 9);
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.Equal(7, copy.BaseSecret);
+            Assert.Equal(9, copy.Derived);
+        }
+
+        [Fact]
+        public void DeepCopy_StructWithReferenceField_IsDeepCloned()
+        {
+            var holder = new Holder { Inner = new TestClass { Id = 1, Name = "x" } };
+
+            var copy = holder.DeepCopy();
+
+            Assert.NotSame(holder.Inner, copy.Inner);
+            copy.Inner.Name = "y";
+            Assert.Equal("x", holder.Inner.Name);
+        }
+
+        [Fact]
+        public void DeepCopy_Delegate_IsCopiedByReference()
+        {
+            Action callback = () => { };
+            var original = new WithDelegate { Value = 5, Callback = callback };
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.Equal(5, copy.Value);
+            Assert.Same(callback, copy.Callback);
+        }
+
+        [Fact]
+        public void DeepCopy_PrimitiveArray_IsIndependentCopy()
+        {
+            var original = new[] { 1, 2, 3 };
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.Equal(original, copy);
+            copy[0] = 99;
+            Assert.Equal(1, original[0]);
+        }
+
+        [Fact]
+        public void DeepCopy_EmptyArrayAndList_AreClonedEmpty()
+        {
+            var arr = new int[0];
+            var arrCopy = arr.DeepCopy();
+            Assert.NotSame(arr, arrCopy);
+            Assert.Empty(arrCopy);
+
+            var list = new List<int>();
+            var listCopy = list.DeepCopy();
+            Assert.NotSame(list, listCopy);
+            Assert.Empty(listCopy);
+        }
+
+        [Fact]
+        public void DeepCopy_TwoDimensionalPrimitiveArray_IsIndependentCopy()
+        {
+            var grid = new[,] { { 1, 2 }, { 3, 4 } };
+
+            var copy = grid.DeepCopy();
+
+            Assert.NotSame(grid, copy);
+            Assert.Equal(2, copy.GetLength(0));
+            Assert.Equal(2, copy.GetLength(1));
+            Assert.Equal(4, copy[1, 1]);
+            copy[0, 0] = 99;
+            Assert.Equal(1, grid[0, 0]);
+        }
+
+        [Fact]
+        public void DeepCopy_TwoDimensionalReferenceArray_DeepClonesElements()
+        {
+            var grid = new[,] { { new TestClass { Name = "a" }, new TestClass { Name = "b" } } };
+
+            var copy = grid.DeepCopy();
+
+            Assert.NotSame(grid[0, 0], copy[0, 0]);
+            Assert.Equal("a", copy[0, 0].Name);
+            Assert.Equal("b", copy[0, 1].Name);
+        }
+
+        [Fact]
+        public void DeepCopy_JaggedArray_IsDeepCloned()
+        {
+            var jagged = new[] { new[] { 1, 2 }, new[] { 3 } };
+
+            var copy = jagged.DeepCopy();
+
+            Assert.NotSame(jagged[0], copy[0]);
+            copy[0][0] = 99;
+            Assert.Equal(1, jagged[0][0]);
+        }
+
+        [Fact]
+        public void DeepCopy_Dictionary_IsDeepCloned()
+        {
+            var original = new Dictionary<string, TestClass> { ["a"] = new TestClass { Id = 1, Name = "x" } };
+
+            var copy = original.DeepCopy();
+
+            Assert.NotSame(original, copy);
+            Assert.NotSame(original["a"], copy["a"]);
+            Assert.Equal("x", copy["a"].Name);
+            copy["a"].Name = "y";
+            Assert.Equal("x", original["a"].Name);
+        }
+
+        [Fact]
+        public void DeepCopy_SelfReferencingObject_PreservesSelfCycle()
+        {
+            var node = new Node { Value = 1 };
+            node.Next = node;
+
+            var copy = node.DeepCopy();
+
+            Assert.NotSame(node, copy);
+            Assert.Same(copy, copy.Next);
+        }
+
+        [Fact]
+        public void DeepCopy_SharedReferenceWithinCollection_StaysShared()
+        {
+            var shared = new TestClass { Name = "s" };
+            var list = new List<TestClass> { shared, shared };
+
+            var copy = list.DeepCopy();
+
+            Assert.NotSame(shared, copy[0]);
+            Assert.Same(copy[0], copy[1]);
+        }
+
+        [Fact]
         public void IsEquivalentDetectsMismatchNotOnlyInLastElement()
         {
             // Regression: a non-final differing element used to be ignored.
@@ -1277,6 +1440,30 @@ namespace Extensions.Standard.Test
         {
             public int Value { get; set; }
             public Node Next { get; set; }
+        }
+
+        private struct Holder
+        {
+            public TestClass Inner { get; set; }
+        }
+
+        private class BaseWithPrivate
+        {
+            private readonly int _baseSecret;
+            public BaseWithPrivate(int baseSecret) => _baseSecret = baseSecret;
+            public int BaseSecret => _baseSecret;
+        }
+
+        private class DerivedWithValue : BaseWithPrivate
+        {
+            public DerivedWithValue(int baseSecret, int derived) : base(baseSecret) => Derived = derived;
+            public int Derived { get; set; }
+        }
+
+        private class WithDelegate
+        {
+            public int Value { get; set; }
+            public Action Callback { get; set; }
         }
 
         private static IList<double> SoftmaxNaive(IList<double> input)
