@@ -1,26 +1,25 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Ship XML docs for documented members without requiring every public member to be documented. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <Description>Lightweight extensions methods (and constants) for common programming tasks:
 
 Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, InnerProduct, IsPrime, ManhattanDistance, EuclideanDistance, InClosedRange, MeanSquaredError, EqualsWithTolerance, HsVtoArgb, Scale, Fit and many more.</Description>
     <Company>Piotr Falkowski</Company>
     <Authors>Piotr Falkowski</Authors>
-    <Copyright>Piotr Falkowski © 2024</Copyright>
-    <PackageLicenseUrl></PackageLicenseUrl>
+    <Copyright>Piotr Falkowski © 2026</Copyright>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/PFalkowski/Extensions.Standard</PackageProjectUrl>
     <RepositoryUrl>https://github.com/PFalkowski/Extensions.Standard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
-    <Version>9.1.0</Version>
-    <PackageReleaseNotes>Add DeepCopy</PackageReleaseNotes>
+    <Version>9.2.0</Version>
+    <PackageReleaseNotes>Multi-target netstandard2.0 and net8.0. Fixed IsEquivalent, AsMemory/AsMemoryDecimal high orders, generic Scale, and AsColor packing.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE;RELEASE;NETSTANDARD2_0</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
