@@ -12,6 +12,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # required to request the GitHub OIDC token for NuGet Trusted Publishing
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -44,5 +47,11 @@ jobs:
       - name: Pack
         run: dotnet pack Extensions.Standard/Extensions.Standard.csproj --configuration Release --output ./artifacts -p:Version=${{ steps.ver.outputs.version }}
 
+      - name: NuGet auth (Trusted Publishing via OIDC)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Push to NuGet
-        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
