@@ -18,8 +18,8 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>10.0.0</Version>
-    <PackageReleaseNotes>Multi-target netstandard2.0 and net8.0. Fixed IsEquivalent, AsMemory/AsMemoryDecimal high orders, generic Scale, and AsColor packing. Deprecated InClosedRange/InOpenRange (misleading names) in favor of InRangeInclusive/InRangeExclusive, and ConstructLine in favor of ConstructLineFromRadians/ConstructLineFromDegrees.</PackageReleaseNotes>
+    <Version>11.0.0</Version>
+    <PackageReleaseNotes>DeepCopy is now a dependency-free reflection-based deep clone (copies private/inherited fields, preserves shared references and cycles, no serializable/parameterless-ctor requirement). Removed the Newtonsoft.Json dependency and the JsonSerializerSettings overload.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
@@ -28,7 +28,6 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="StandardInterfaces" Version="3.1.0" />
   </ItemGroup>
 
