@@ -24,7 +24,7 @@ All notable changes to this project are documented here. The format is based on
 ### Added
 - Black-box test coverage for previously-untested public surface (`HsVtoArgb`, `Head`/`Tail`/
   `HeadAndTail`, `PluralizeWhenNeeded`, `AsTime(TimeSpan)`, `FindMinMaxInOn`, `Scale()`, `MaxIndex`).
-- Code coverage upload to Codecov from CI, and a SonarCloud analysis workflow (see `SONAR_SETUP.md`).
+- Code coverage upload to Codecov from CI, and tokenless SonarCloud Automatic Analysis (see `SONAR_SETUP.md`).
 
 ## [11.0.0]
 
