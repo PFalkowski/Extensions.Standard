@@ -18,8 +18,12 @@ Suffixes (AsMemory, AsTime), Interpolate, Partition, Shuffle (O(n)), Softmax, In
     <RepositoryType>git</RepositoryType>
     <PackageTags>extensions, extension-methods, netcore, netstandard, boilerplate</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>11.0.0</Version>
-    <PackageReleaseNotes>DeepCopy is now a dependency-free reflection-based deep clone (copies private/inherited fields, preserves shared references and cycles, no serializable/parameterless-ctor requirement). Removed the Newtonsoft.Json dependency and the JsonSerializerSettings overload.</PackageReleaseNotes>
+    <Version>12.0.0</Version>
+    <PackageReleaseNotes>Breaking changes:
+- Area() now returns a non-negative magnitude (was the signed shoelace area, negative for clockwise polygons).
+- MaxIndex() and FindMinMaxInOn() now throw InvalidOperationException on an empty sequence (matching LINQ Max/Min). Scale() on an empty sequence still returns empty.
+- AsTime(TimeSpan) no longer leaves a trailing ", " separator and returns "0 ms" for TimeSpan.Zero (consistent with the AsTime(milliseconds) overload).
+- Removed the redundant Scale&lt;T&gt;(IEnumerable&lt;double&gt;) overload whose type parameter was unused (use the non-generic Scale()).</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 

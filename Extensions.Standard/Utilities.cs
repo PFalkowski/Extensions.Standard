@@ -94,7 +94,7 @@ namespace Extensions.Standard
                 num += (polygon[index][0] + polygon[i][0]) * (polygon[index][1] - polygon[i][1]);
                 index = i;
             }
-            return num / 2;
+            return Math.Abs(num / 2);
         }
 
         #endregion
@@ -404,6 +404,8 @@ namespace Extensions.Standard
         public static int MaxIndex(this IEnumerable<double> input)
         {
             var inputAsList = input.ToList();
+            if (inputAsList.Count == 0)
+                throw new InvalidOperationException("Sequence contains no elements.");
             var index = 0;
             var value = inputAsList[0];
             for (var i = 0; i < inputAsList.Count; ++i)
@@ -639,7 +641,8 @@ namespace Extensions.Standard
             {
                 stb.AppendFormat("{0} ms", timeElapsed.Milliseconds);
             }
-            return stb.ToString();
+            var result = stb.ToString().TrimEnd(' ', ',');
+            return result.Length == 0 ? "0 ms" : result;
         }
 
         /// <summary>
@@ -775,17 +778,22 @@ namespace Extensions.Standard
         {
             var dataMin = double.MaxValue;
             var dataMax = double.MinValue;
+            var any = false;
             foreach (var item in data)
             {
+                any = true;
                 if (item < dataMin) dataMin = item;
                 if (item > dataMax) dataMax = item;
             }
+            if (!any)
+                throw new InvalidOperationException("Sequence contains no elements.");
             return (Min: dataMin, Max: dataMax);
         }
 
         public static IEnumerable<double> Scale(this IEnumerable<double> data, (double Min, double Max) scale)
         {
             var enumerated = data as double[] ?? data.ToArray();
+            if (enumerated.Length == 0) return Array.Empty<double>();
             var (min, max) = enumerated.FindMinMaxInOn();
             var m = (scale.Max - scale.Min) / (max - min);
             var c = scale.Min - min * m;
@@ -806,6 +814,7 @@ namespace Extensions.Standard
         public static IEnumerable<double> Scale<T>(this IEnumerable<T> data, (double Min, double Max) scale) where T : IConvertible
         {
             var enumerated = data as T[] ?? data.ToArray();
+            if (enumerated.Length == 0) return Array.Empty<double>();
             var (min, max) = enumerated.Select(x => Convert.ToDouble(x)).FindMinMaxInOn();
             var m = (scale.Max - scale.Min) / (max - min);
             var c = scale.Min - min * m;
@@ -816,11 +825,6 @@ namespace Extensions.Standard
                 result[i] = m * Convert.ToDouble(enumerated[i]) + c;
             }
             return result;
-        }
-
-        public static IEnumerable<double> Scale<T>(this IEnumerable<double> data) where T : IConvertible
-        {
-            return Scale(data, (Min: 0, Max: 1.0));
         }
 
         public static T Fit<T>(this T value, T min, T max) where T : IComparable<T>

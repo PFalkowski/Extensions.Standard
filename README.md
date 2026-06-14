@@ -1,8 +1,10 @@
 # Extensions.Standard
 
 [![CI](https://github.com/PFalkowski/Extensions.Standard/actions/workflows/ci.yml/badge.svg)](https://github.com/PFalkowski/Extensions.Standard/actions/workflows/ci.yml)
-[![NuGet version (Extensions.Standard)](https://img.shields.io/nuget/v/Extensions.Standard.svg)](https://www.nuget.org/packages/Extensions.Standard/)
-[![Licence (Extensions.Serialization)](https://img.shields.io/github/license/mashape/apistatus.svg)](https://choosealicense.com/licenses/mit/)
+[![codecov](https://codecov.io/gh/PFalkowski/Extensions.Standard/branch/master/graph/badge.svg)](https://codecov.io/gh/PFalkowski/Extensions.Standard)
+[![NuGet version](https://img.shields.io/nuget/v/Extensions.Standard.svg)](https://www.nuget.org/packages/Extensions.Standard/)
+[![NuGet downloads](https://img.shields.io/nuget/dt/Extensions.Standard.svg)](https://www.nuget.org/packages/Extensions.Standard/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Lightweight extensions methods (and constants) for common programming tasks, like:
 
